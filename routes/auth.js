@@ -1,35 +1,161 @@
-var express = require("express");
-var router = express.Router();
+const express = require("express");
+const bcrypt = require("bcryptjs");
+const db = require("../db");
 
-router.get("/login", function (req, res) {
-  res.render("login", { title: "Login" });
-});
+const router = express.Router();
 
-router.get("/register", function (req, res) {
-  res.render("register", { title: "Register" });
-});
-
-router.get("/logout", function (req, res) {
+router.get("/logout", (req, res) => {
   if (req.session) req.session.destroy(() => res.redirect("/"));
   else res.redirect("/");
 });
 
-router.get("/dev-login", (req, res) => {
-  req.session.user = { id: 1, name: "Test User" };
-  res.redirect("/");
+router.get("/register", (req, res) => {
+  res.render("register", { title: "Register", errors: [], values: {} });
 });
 
-router.get("/dev-logout", (req, res) => {
-  if (req.session) {
-    req.session.destroy(() => res.redirect("/"));
-  } else {
-    res.redirect("/");
+router.post("/register", (req, res) => {
+  let { username, email, password, passwordConfirm } = req.body;
+
+  username = (username || "").trim();
+  email = (email || "").trim().toLowerCase();
+
+  const errors = [];
+  const values = { username, email };
+
+  if (!username || username.length < 3)
+    errors.push("Username must be at least 3 characters.");
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
+  if (!email || !emailRegex.test(email))
+    errors.push("Please enter a valid email address.");
+  if (!password || password.length < 8)
+    errors.push("Password must be at least 8 characters.");
+  if (password !== passwordConfirm) errors.push("Passwords do not match.");
+
+  if (errors.length) {
+    return res
+      .status(400)
+      .render("register", { title: "Register", errors, values });
   }
+
+  db.get(
+    "SELECT id FROM users WHERE username = ? COLLATE NOCASE",
+    [username],
+    (e1, r1) => {
+      if (e1) {
+        console.error(e1);
+        return res.status(500).render("register", {
+          title: "Register",
+          errors: ["Server error. Try again."],
+          values,
+        });
+      }
+      if (r1) {
+        return res.status(400).render("register", {
+          title: "Register",
+          errors: ["Username already taken."],
+          values,
+        });
+      }
+
+      db.get(
+        "SELECT id FROM users WHERE email = ? COLLATE NOCASE",
+        [email],
+        (e2, r2) => {
+          if (e2) {
+            console.error(e2);
+            return res.status(500).render("register", {
+              title: "Register",
+              errors: ["Server error. Try again."],
+              values,
+            });
+          }
+          if (r2) {
+            return res.status(400).render("register", {
+              title: "Register",
+              errors: ["Email already in use."],
+              values,
+            });
+          }
+
+          const hash = bcrypt.hashSync(password, 10);
+          db.run(
+            "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
+            [username, email, hash],
+            function (e3) {
+              if (e3) {
+                console.error(e3);
+                return res.status(500).render("register", {
+                  title: "Register",
+                  errors: ["Server error. Try again."],
+                  values,
+                });
+              }
+              // Auto-login
+              req.session.user = { id: this.lastID, username, email };
+              return res.redirect("/");
+            }
+          );
+        }
+      );
+    }
+  );
 });
 
-router.get("/login", (req, res) => res.render("login", { title: "Login" }));
-router.get("/register", (req, res) =>
-  res.render("register", { title: "Register" })
-);
+router.get("/login", (req, res) => {
+  res.render("login", { title: "Login", errors: [], values: {} });
+});
+
+router.post("/login", (req, res) => {
+  let { email, password } = req.body;
+
+  email = (email || "").trim().toLowerCase();
+
+  const errors = [];
+  const values = { email };
+
+  if (!email || !password) {
+    errors.push("Email and password are required.");
+    return res.status(400).render("login", { title: "Login", errors, values });
+  }
+
+  db.get(
+    "SELECT * FROM users WHERE email = ? COLLATE NOCASE",
+    [email],
+    (err, user) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).render("login", {
+          title: "Login",
+          errors: ["Server error. Try again."],
+          values,
+        });
+      }
+      if (!user) {
+        return res.status(400).render("login", {
+          title: "Login",
+          errors: ["Invalid credentials."],
+          values,
+        });
+      }
+
+      const ok = bcrypt.compareSync(password, user.password_hash);
+      if (!ok) {
+        return res.status(400).render("login", {
+          title: "Login",
+          errors: ["Invalid credentials."],
+          values,
+        });
+      }
+
+      req.session.user = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        avatar_url: user.avatar_url || null,
+      };
+      res.redirect("/");
+    }
+  );
+});
 
 module.exports = router;

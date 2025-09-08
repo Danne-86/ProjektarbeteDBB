@@ -1,5 +1,7 @@
 <% 
    const _isAuth = (typeof isAuthenticated !== 'undefined' && isAuthenticated) ? true : false;
+   const _user = (typeof user !== 'undefined' && user) ? user : null;
+   const _avatar = (_user && _user.avatar_url) ? _user.avatar_url : '/avatars/default.svg';
 %>
 
 <header class="w-full bg-white border-b border-gray-200">
@@ -14,9 +16,9 @@
     <div class="col-span-2"></div>
 
     <div class="col-span-3 flex justify-end items-center">
-      <a href="/" class="inline-flex items-center">
-        <img src="/avatars/default.svg" alt="Profile avatar" class="h-12 w-12 rounded-full ring-1 ring-gray-300 object-cover">
-        <span class="sr-only">Profile options</span>
+      <a href="<%= _isAuth ? '/profile' : '/' %>" class="inline-flex items-center">
+        <img src="<%= _avatar %>" alt="<%= _user ? (_user.username + ' avatar') : 'Profile avatar' %>" class="h-12 w-12 rounded-full ring-1 ring-gray-300 object-cover">
+        <span class="sr-only"><%= _isAuth ? 'Profile options' : 'Profile' %></span>
       </a>
     </div>
   </div>
@@ -30,7 +32,7 @@
         <ul class="flex items-center space-x-8">
           <% if (_isAuth) { %>
             <li><a href="/" class="text-gray-700 hover:text-gray-900">New post</a></li>
-            <li><a href="/" class="text-gray-700 hover:text-gray-900">Profile options</a></li>
+            <li><a href="/profile" class="text-gray-700 hover:text-gray-900">Profile options</a></li>
             <li><a href="/" class="text-gray-700 hover:text-gray-900">Follower options</a></li>
             <li><a href="/logout" class="text-gray-700 hover:text-gray-900">Logout</a></li>
           <% } else { %>
@@ -59,7 +61,7 @@
 
         <% if (_isAuth) { %>
           <li><a href="/" class="block px-2 py-2 rounded hover:bg-gray-100">New post</a></li>
-          <li><a href="/" class="block px-2 py-2 rounded hover:bg-gray-100">Profile options</a></li>
+          <li><a href="/profile" class="block px-2 py-2 rounded hover:bg-gray-100">Profile options</a></li>
           <li><a href="/" class="block px-2 py-2 rounded hover:bg-gray-100">Follower options</a></li>
           <li><a href="/logout" class="block px-2 py-2 rounded hover:bg-gray-100">Logout</a></li>
         <% } else { %>

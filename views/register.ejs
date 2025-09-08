@@ -10,11 +10,45 @@
     <%- include('partials/header') %>
     <main class="mx-auto max-w-md p-6">
       <h1 class="text-2xl font-bold mb-4">Register</h1>
-      <form class="space-y-4">
-        <input class="w-full border rounded p-2" placeholder="Email" />
-        <input class="w-full border rounded p-2" placeholder="Username" />
-        <input class="w-full border rounded p-2" type="password" placeholder="Password" />
-        <button class="px-4 py-2 border rounded">Create account</button>
+
+      <% if (errors && errors.length) { %>
+        <div class="mb-4 rounded border border-red-200 bg-red-50 p-3 text-red-700">
+          <ul class="list-disc list-inside">
+            <% errors.forEach(e => { %><li><%= e %></li><% }) %>
+          </ul>
+        </div>
+      <% } %>
+
+      <form method="POST" action="/register" class="space-y-4">
+        <div>
+          <label class="block text-sm mb-1" for="username">Username</label>
+          <input id="username" name="username" required minlength="3"
+                 value="<%= (values && values.username) ? values.username : '' %>"
+                 class="w-full border rounded p-2" placeholder="yourname" />
+        </div>
+
+        <div>
+          <label class="block text-sm mb-1" for="email">Email</label>
+          <input id="email" name="email" type="email" required
+                 value="<%= (values && values.email) ? values.email : '' %>"
+                 class="w-full border rounded p-2" placeholder="you@example.com" />
+        </div>
+
+        <div>
+          <label class="block text-sm mb-1" for="password">Password</label>
+          <input id="password" name="password" type="password" required minlength="8"
+                 class="w-full border rounded p-2" placeholder="••••••••" />
+        </div>
+
+        <div>
+          <label class="block text-sm mb-1" for="passwordConfirm">Confirm Password</label>
+          <input id="passwordConfirm" name="passwordConfirm" type="password" required minlength="8"
+                 class="w-full border rounded p-2" placeholder="••••••••" />
+        </div>
+
+        <button class="w-full px-4 py-2 border rounded bg-white hover:bg-gray-50">
+          Create account
+        </button>
       </form>
     </main>
   </body>
