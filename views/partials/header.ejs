@@ -1,0 +1,92 @@
+<% 
+   const _isAuth = (typeof isAuthenticated !== 'undefined' && isAuthenticated) ? true : false;
+%>
+
+<header class="w-full bg-white border-b border-gray-200">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 grid grid-cols-12 items-center gap-3">
+    <div class="col-span-7">
+      <a href="/" class="inline-flex items-center gap-3">
+        <img src="/logos/logo.svg" alt="Logo" class="h-12 w-auto select-none">
+        <span class="sr-only">Back to homepage</span>
+      </a>
+    </div>
+
+    <div class="col-span-2"></div>
+
+    <div class="col-span-3 flex justify-end items-center">
+      <a href="/" class="inline-flex items-center">
+        <img src="/avatars/default.svg" alt="Profile avatar" class="h-12 w-12 rounded-full ring-1 ring-gray-300 object-cover">
+        <span class="sr-only">Profile options</span>
+      </a>
+    </div>
+  </div>
+
+  <nav class="bg-gray-50 border-t border-gray-200">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="hidden md:flex items-center justify-between py-3">
+        <ul class="flex items-center space-x-8">
+          <li><a href="/" class="text-gray-700 hover:text-gray-900">Back to homepage</a></li>
+        </ul>
+        <ul class="flex items-center space-x-8">
+          <% if (_isAuth) { %>
+            <li><a href="/" class="text-gray-700 hover:text-gray-900">New post</a></li>
+            <li><a href="/" class="text-gray-700 hover:text-gray-900">Profile options</a></li>
+            <li><a href="/" class="text-gray-700 hover:text-gray-900">Follower options</a></li>
+            <li><a href="/logout" class="text-gray-700 hover:text-gray-900">Logout</a></li>
+          <% } else { %>
+            <li><a href="/login" class="text-gray-700 hover:text-gray-900">Login</a></li>
+            <li><a href="/register" class="text-gray-700 hover:text-gray-900">Register</a></li>
+          <% } %>
+        </ul>
+      </div>
+
+      <div class="md:hidden py-3 flex items-center justify-between">
+        <button id="mobileHamburger"
+                class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 shadow-sm bg-white hover:bg-gray-50"
+                aria-controls="mobileMenu"
+                aria-expanded="false">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          <span class="text-sm font-medium">Menu</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="mobileMenu" class="hidden md:hidden px-4 pb-3">
+      <ul class="space-y-2">
+        <li><a href="/" class="block px-2 py-2 rounded hover:bg-gray-100">Back to homepage</a></li>
+
+        <% if (_isAuth) { %>
+          <li><a href="/" class="block px-2 py-2 rounded hover:bg-gray-100">New post</a></li>
+          <li><a href="/" class="block px-2 py-2 rounded hover:bg-gray-100">Profile options</a></li>
+          <li><a href="/" class="block px-2 py-2 rounded hover:bg-gray-100">Follower options</a></li>
+          <li><a href="/logout" class="block px-2 py-2 rounded hover:bg-gray-100">Logout</a></li>
+        <% } else { %>
+          <li><a href="/login" class="block px-2 py-2 rounded hover:bg-gray-100">Login</a></li>
+          <li><a href="/register" class="block px-2 py-2 rounded hover:bg-gray-100">Register</a></li>
+        <% } %>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<script>
+  (function () {
+    const mobileHamburger = document.getElementById('mobileHamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    if (mobileHamburger) {
+      mobileHamburger.addEventListener('click', function () {
+        const isOpen = !mobileMenu.classList.contains('hidden');
+        if (isOpen) {
+          mobileMenu.classList.add('hidden');
+          mobileHamburger.setAttribute('aria-expanded', 'false');
+        } else {
+          mobileMenu.classList.remove('hidden');
+          mobileHamburger.setAttribute('aria-expanded', 'true');
+        }
+      });
+    }
+  })();
+</script>
