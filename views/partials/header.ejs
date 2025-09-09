@@ -1,94 +1,217 @@
-<% 
-   const _isAuth = (typeof isAuthenticated !== 'undefined' && isAuthenticated) ? true : false;
-   const _user = (typeof user !== 'undefined' && user) ? user : null;
-   const _avatar = (_user && _user.avatar_url) ? _user.avatar_url : '/avatars/default.svg';
+<%
+  const _isAuth = (typeof isAuthenticated !== 'undefined' && isAuthenticated) ? true : false;
+  const _user = (typeof user !== 'undefined' && user) ? user : null;
+  const _avatar = (_user && _user.avatar_url) ? _user.avatar_url : '/avatars/default.svg';
 %>
 
 <header class="w-full bg-white border-b border-gray-200">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 grid grid-cols-12 items-center gap-3">
-    <div class="col-span-7">
-      <a href="/" class="inline-flex items-center gap-3">
-        <img src="/logos/logo.svg" alt="Logo" class="h-12 w-auto select-none">
-        <span class="sr-only">Back to homepage</span>
-      </a>
+  <div class="w-full bg-white">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3">
+      <p class="text-center font-semibold text-purple-700 text-[clamp(14px,2vw,20px)]">
+        Where thoughts find their rhythm and words find their home
+      </p>
     </div>
+  </div>
 
-    <div class="col-span-2"></div>
+  <div class="mx-auto overflow-hidden max-w-7xl px-4 sm:px-6 max-h-20 lg:px-8 py-3 flex items-center justify-between gap-4 max-h-40">
+    <a href="/" class="inline-flex items-center">
+      <img src="logos/InkFlow_logo.jpg" alt="InkFlow" class=" select-none" />
+      <span class="sr-only">Back to homepage</span>
+    </a>
 
-    <div class="col-span-3 flex justify-end items-center">
-      <a href="<%= _isAuth ? '/profile' : '/' %>" class="inline-flex items-center">
-        <img src="<%= _avatar %>" alt="<%= _user ? (_user.username + ' avatar') : 'Profile avatar' %>" class="h-12 w-12 rounded-full ring-1 ring-gray-300 object-cover">
-        <span class="sr-only"><%= _isAuth ? 'Profile options' : 'Profile' %></span>
-      </a>
-    </div>
+    <% if (_isAuth) { %>
+      <div class="flex items-center gap-4">
+        <a href="/profile" class="inline-flex items-center">
+          <img src="<%= _avatar %>" alt="<%= _user.username %> avatar"
+               class="h-12 w-12 rounded-full ring-1 ring-gray-300 object-cover" />
+          <span class="sr-only">Profile</span>
+        </a>
+      </div>
+    <% } else { %>
+      <div class="hidden sm:flex items-center gap-2">
+        <a href="#" data-modal-open="login"
+           class="inline-flex items-center justify-center rounded-md px-5 py-2.5 bg-purple-700 text-white hover:bg-purple-800 shadow-sm">
+          Login
+        </a>
+        <a href="#" data-modal-open="register"
+           class="inline-flex items-center justify-center rounded-md px-5 py-2.5 border-2 border-purple-700 text-purple-700 hover:bg-purple-50">
+          Register
+        </a>
+      </div>
+      <button id="mobileHamburger"
+              class="sm:hidden inline-flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 shadow-sm bg-white hover:bg-gray-50"
+              aria-controls="mobileMenu" aria-expanded="false">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+        <span class="text-sm font-medium">Menu</span>
+      </button>
+    <% } %>
   </div>
 
   <nav class="bg-gray-50 border-t border-gray-200">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="hidden md:flex items-center justify-between py-3">
         <ul class="flex items-center space-x-8">
-          <li><a href="/" class="text-gray-700 hover:text-gray-900">Back to homepage</a></li>
+          <li><a href="/" class="text-gray-700 hover:text-gray-900">Home</a></li>
         </ul>
+
         <ul class="flex items-center space-x-8">
           <% if (_isAuth) { %>
             <li><a href="/" class="text-gray-700 hover:text-gray-900">New post</a></li>
             <li><a href="/profile" class="text-gray-700 hover:text-gray-900">Profile options</a></li>
             <li><a href="/" class="text-gray-700 hover:text-gray-900">Follower options</a></li>
             <li><a href="/logout" class="text-gray-700 hover:text-gray-900">Logout</a></li>
-          <% } else { %>
-            <li><a href="/login" class="text-gray-700 hover:text-gray-900">Login</a></li>
-            <li><a href="/register" class="text-gray-700 hover:text-gray-900">Register</a></li>
           <% } %>
         </ul>
       </div>
 
-      <div class="md:hidden py-3 flex items-center justify-between">
-        <button id="mobileHamburger"
-                class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 shadow-sm bg-white hover:bg-gray-50"
-                aria-controls="mobileMenu"
-                aria-expanded="false">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
-          <span class="text-sm font-medium">Menu</span>
-        </button>
+      <div id="mobileMenu" class="hidden md:hidden px-4 pb-3">
+        <ul class="space-y-2">
+          <li><a href="/" class="block px-2 py-2 rounded hover:bg-gray-100">Home</a></li>
+
+          <% if (_isAuth) { %>
+            <li><a href="/" class="block px-2 py-2 rounded hover:bg-gray-100">New post</a></li>
+            <li><a href="/profile" class="block px-2 py-2 rounded hover:bg-gray-100">Profile options</a></li>
+            <li><a href="/" class="block px-2 py-2 rounded hover:bg-gray-100">Follower options</a></li>
+            <li><a href="/logout" class="block px-2 py-2 rounded hover:bg-gray-100">Logout</a></li>
+          <% } else { %>
+            <li><a href="#" data-modal-open="login" class="block px-2 py-2 rounded hover:bg-gray-100">Login</a></li>
+            <li><a href="#" data-modal-open="register" class="block px-2 py-2 rounded hover:bg-gray-100">Register</a></li>
+          <% } %>
+        </ul>
       </div>
     </div>
-
-    <div id="mobileMenu" class="hidden md:hidden px-4 pb-3">
-      <ul class="space-y-2">
-        <li><a href="/" class="block px-2 py-2 rounded hover:bg-gray-100">Back to homepage</a></li>
-
-        <% if (_isAuth) { %>
-          <li><a href="/" class="block px-2 py-2 rounded hover:bg-gray-100">New post</a></li>
-          <li><a href="/profile" class="block px-2 py-2 rounded hover:bg-gray-100">Profile options</a></li>
-          <li><a href="/" class="block px-2 py-2 rounded hover:bg-gray-100">Follower options</a></li>
-          <li><a href="/logout" class="block px-2 py-2 rounded hover:bg-gray-100">Logout</a></li>
-        <% } else { %>
-          <li><a href="/login" class="block px-2 py-2 rounded hover:bg-gray-100">Login</a></li>
-          <li><a href="/register" class="block px-2 py-2 rounded hover:bg-gray-100">Register</a></li>
-        <% } %>
-      </ul>
-    </div>
   </nav>
+
+  <% if (!_isAuth) { %>
+    <div id="modalOverlay" class="fixed inset-0 bg-black/50 hidden z-40"></div>
+    <div id="modal-login" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
+      <div class="mx-auto w-full max-w-2xl rounded-xl bg-[#eff1f7] shadow-xl ring-1 ring-gray-300">
+        <div class="flex items-center justify-end px-4 pt-3">
+          <button class="p-2 text-gray-700 hover:text-gray-900" data-modal-close aria-label="Close">✕</button>
+        </div>
+        <form method="POST" action="/login" class="px-8 pb-8">
+          <div class="space-y-6">
+            <div>
+              <label for="login-email" class="block text-sm text-gray-700 mb-1">E-mail</label>
+              <input id="login-email" name="email" type="email" required
+                     class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600" />
+            </div>
+            <div>
+              <label for="login-password" class="block text-sm text-gray-700 mb-1">Password</label>
+              <input id="login-password" name="password" type="password" required
+                     class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600" />
+            </div>
+          </div>
+          <div class="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
+            <button class="inline-flex justify-center rounded-md px-6 py-2.5 bg-purple-700 text-white hover:bg-purple-800">Login</button>
+            <a href="#" data-modal-open="register"
+               class="inline-flex justify-center rounded-md px-6 py-2.5 border-2 border-purple-700 text-purple-700 hover:bg-purple-50">Register</a>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div id="modal-register" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
+      <div class="mx-auto w-full max-w-2xl rounded-xl bg-[#eff1f7] shadow-xl ring-1 ring-gray-300">
+        <div class="flex items-center justify-end px-4 pt-3">
+          <button class="p-2 text-gray-700 hover:text-gray-900" data-modal-close aria-label="Close">✕</button>
+        </div>
+        <form method="POST" action="/register" class="px-8 pb-8">
+          <div class="space-y-5">
+            <div>
+              <label for="reg-email" class="block text-sm text-gray-700 mb-1">E-mail</label>
+              <input id="reg-email" name="email" type="email" required
+                     class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600" />
+            </div>
+            <div>
+              <label for="reg-username" class="block text-sm text-gray-700 mb-1">Username</label>
+              <input id="reg-username" name="username" type="text" minlength="3" required
+                     class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600" />
+            </div>
+            <div>
+              <label for="reg-newpass" class="block text-sm text-gray-700 mb-1">New password</label>
+              <input id="reg-newpass" name="password" type="password" minlength="8" required
+                     class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600" />
+            </div>
+            <div>
+              <label for="reg-conf" class="block text-sm text-gray-700 mb-1">Password</label>
+              <input id="reg-conf" name="passwordConfirm" type="password" minlength="8" required
+                     class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600" />
+            </div>
+          </div>
+          <div class="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
+            <button class="inline-flex justify-center rounded-md px-6 py-2.5 bg-purple-700 text-white hover:bg-purple-800">Register</button>
+            <a href="#" data-modal-open="login"
+               class="inline-flex justify-center rounded-md px-6 py-2.5 border-2 border-purple-700 text-purple-700 hover:bg-purple-50">Login</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  <% } %>
 </header>
 
 <script>
   (function () {
     const mobileHamburger = document.getElementById('mobileHamburger');
     const mobileMenu = document.getElementById('mobileMenu');
-
-    if (mobileHamburger) {
+    if (mobileHamburger && mobileMenu) {
       mobileHamburger.addEventListener('click', function () {
         const isOpen = !mobileMenu.classList.contains('hidden');
-        if (isOpen) {
-          mobileMenu.classList.add('hidden');
-          mobileHamburger.setAttribute('aria-expanded', 'false');
-        } else {
-          mobileMenu.classList.remove('hidden');
-          mobileHamburger.setAttribute('aria-expanded', 'true');
-        }
+        mobileMenu.classList.toggle('hidden', isOpen);
+        mobileHamburger.setAttribute('aria-expanded', (!isOpen).toString());
       });
     }
+    const overlay = document.getElementById('modalOverlay');
+    const loginModal = document.getElementById('modal-login');
+    const registerModal = document.getElementById('modal-register');
+
+    function openModal(modalEl) {
+      if (!overlay || !modalEl) return;
+      overlay.classList.remove('hidden');
+      modalEl.classList.remove('hidden');
+      modalEl.classList.add('flex');
+      document.documentElement.classList.add('overflow-hidden');
+      const firstInput = modalEl.querySelector('input');
+      if (firstInput) setTimeout(() => firstInput.focus(), 0);
+    }
+
+    function closeAllModals() {
+      if (!overlay) return;
+      overlay.classList.add('hidden');
+      [loginModal, registerModal].forEach(m => {
+        if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+      });
+      document.documentElement.classList.remove('overflow-hidden');
+    }
+
+    function switchTo(name) {
+      closeAllModals();
+      if (name === 'login') openModal(loginModal);
+      if (name === 'register') openModal(registerModal);
+    }
+
+    document.querySelectorAll('[data-modal-open]').forEach(el => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        const name = el.getAttribute('data-modal-open');
+        if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+          mobileMenu.classList.add('hidden');
+        }
+        switchTo(name);
+      });
+    });
+
+    document.querySelectorAll('[data-modal-close]').forEach(el => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        closeAllModals();
+      });
+    });
+    if (overlay) overlay.addEventListener('click', closeAllModals);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllModals(); });
   })();
 </script>
+
