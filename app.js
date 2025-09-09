@@ -15,7 +15,6 @@ const app = express();
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-// Core middleware
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -24,24 +23,25 @@ app.use(cookieParser());
 // Sessions
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "dev-secret",
+    secret: "dev-secret", // should be in .env file if going to production
     resave: false,
     saveUninitialized: false,
+    name: "sid", // cookie name
     cookie: {
-      secure: false, // set true with HTTPS + app.set('trust proxy', 1)
-      sameSite: "lax",
+      httpOnly: true, // mitigate XSS cookie theft
+      sameSite: "lax", // sane default
+      secure: false, // keep false since http:// in dev
+      maxAge: 1000 * 60 * 60 * 24, // cookies will expire after1 day
     },
   })
 );
 
-// Make auth flags available to views
 app.use((req, res, next) => {
   res.locals.isAuthenticated = !!(req.session && req.session.user);
   res.locals.user = req.session ? req.session.user : null;
   next();
 });
 
-// Static
 app.use(express.static(path.join(__dirname, "public")));
 
 // Routers
