@@ -151,7 +151,8 @@ router.post("/login", (req, res) => {
         id: user.id,
         username: user.username,
         email: user.email,
-        avatar_url: user.avatar_url || null,
+        avatar_url:
+          user.avatar_url || "/avatars/SpongeBob_SquarePants_character.png",
       };
       res.redirect("/");
     }
