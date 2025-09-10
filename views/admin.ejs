@@ -26,21 +26,21 @@
     </form>
 
     <%
-    const filteredComments = showFlagged ? comments.filter(comment => comment.isFlagged) : comments;
-    const filteredPosts = showFlagged ? posts.filter(post => post.isFlagged || filteredComments.some(comment => comment.postId === post.id)) : posts;
+    const filteredComments = showFlagged ? comments.filter(comment => comment.is_flagged) : comments;
+    const filteredPosts = showFlagged ? posts.filter(post => post.is_flagged || filteredComments.some(comment => comment.post_id === post.id)) : posts;
     %>
-
+    
     <% filteredPosts.forEach((post) => { %>
       <div class="bg-white p-6 rounded-lg shadow mb-6">
       <h2 class="text-xl font-bold mb-2"><%= post.title %></h3>
       <p>
         <%= post.content %>
-              <p><small>Written by <%= post.user.username %></small></p>
+              <p><small>Written by <%= post.username %></small></p>
         <div style="display: flex; flex-direction: row; gap: 10px; align-items: center;">
-          <form action="/admin/posts/<%= post.id %>/delete" method="POST"><button class="px-4 py-2 border rounded bg-white hover:bg-gray-50" type="submit">🗑️</button></form>
-          <% if (post.isFlagged == true) { %>
+          <form action="/admin/posts/delete" method="POST" onsubmit="return confirm('Do you really want to delete <%= post.title %>?')"><input type="hidden" name="showFlagged" value="<%= showFlagged %>"><button class="px-4 py-2 border rounded bg-white hover:bg-gray-50" type="submit" name="id" value="<%= post.id %>">🗑️</button></form>
+          <% if (post.is_flagged == true) { %>
           <span>🚩</span>
-          <form action="/admin/posts/<%= post.id %>/unflag" method="POST"><button class="px-4 py-2 border rounded bg-white hover:bg-gray-50" type="submit">Unflag</button></form>
+          <form action="/admin/posts/unflag" method="POST" onsubmit="return confirm('Do you really want to unflag <%= post.title %>?')"><input type="hidden" name="showFlagged" value="<%= showFlagged %>"><button class="px-4 py-2 border rounded bg-white hover:bg-gray-50" type="submit" name="id" value="<%= post.id %>">Unflag</button></form>
           <% } %>
         </div>
       </p>
@@ -48,17 +48,17 @@
       <h3 class="text-lg font-bold m-2">Comments</h3>
 
       <% filteredComments.forEach((comment) => { %>
-      <% if (comment.postId === post.id) { %>
+      <% if (comment.post_id === post.id) { %>
       <div class="ml-4">
         <p>
           <div class="flex flex-row gap-2 items-center">
-            <small><%= comment.user.username %></small>
+            <small><%= comment.username %></small>
             <p><%= comment.content %></p>
             
-            <form action="/admin/comments/<%= comment.id %>/delete" method="POST"><button class="px-4 py-2 border rounded bg-white hover:bg-gray-50" type="submit">🗑️</button></form>
-            <% if (comment.isFlagged == true) { %>
+            <form action="/admin/comments/delete" method="POST" onsubmit="return confirm('Do you really want to delete comment?\n <%= comment.content %>')"><input type="hidden" name="showFlagged" value="<%= showFlagged %>"><button class="px-4 py-2 border rounded bg-white hover:bg-gray-50" type="submit" name="id" value="<%= comment.id %>">🗑️</button></form>
+            <% if (comment.is_flagged == true) { %>
             <span>🚩</span>
-            <form action="/admin/comments/<%= comment.id %>/unflag" method="POST"><button class="px-4 py-2 border rounded bg-white hover:bg-gray-50" type="submit">Unflag</button></form>
+            <form action="/admin/comments/unflag" method="POST" onsubmit="return confirm('Do you really want to unflag comment?\n <%= comment.content %>')"><input type="hidden" name="showFlagged" value="<%= showFlagged %>"><button class="px-4 py-2 border rounded bg-white hover:bg-gray-50" type="submit" name="id" value="<%= comment.id %>">Unflag</button></form>
             <% } %>
 
           </div>

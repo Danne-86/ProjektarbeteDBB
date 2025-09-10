@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
+const db = require("../db");
+
 /* GET admin dashboard page. */
 router.get("/", (req, res, next) => {
   // const { user } = req.session ? req.session : {}; // Uncomment when session is implemented
@@ -16,118 +18,50 @@ router.get("/", (req, res, next) => {
     return res.status(403).send("Access denied");
   }
 
-  // Placeholders for demonstration
-  let posts = [
-    {
-      id: 1,
-      title: "Sample Post 1",
-      content:
-        "This is a sample post with a lot of content. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      user: {
-        id: 12,
-        username: "Sean Banan",
-      },
-      isFlagged: false,
-    },
-    {
-      id: 2,
-      title: "Sample Post 2",
-      content:
-        "This is a sample post with a lot of content. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      user: {
-        id: 12,
-        username: "Sean Banan",
-      },
-      isFlagged: true,
-    },
-    {
-      id: 3,
-      title: "Sample Post 3",
-      content:
-        "This is a sample post with a lot of content. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      user: {
-        id: 13,
-        username: "Jane Doe",
-      },
-      isFlagged: false,
-    },
-    {
-      id: 4,
-      title: "Sample Post 4",
-      content: "This is a sample post content.",
-      user: {
-        id: 13,
-        username: "Jane Doe",
-      },
-      isFlagged: true,
-    },
-  ];
+  const posts = db
+    .prepare(
+      `SELECT posts.*, users.username AS username, users.id AS user_id
+      FROM posts
+      INNER JOIN users
+        ON posts.user_id = users.id`
+    )
+    .all();
 
-  let comments = [
-    {
-      id: 1,
-      postId: 3,
-      content: "This is a sample comment 1.",
-      user: {
-        id: 11,
-        username: "Joe Doe",
-      },
-      isFlagged: true,
-    },
-    {
-      id: 2,
-      postId: 3,
-      content: "This is a sample comment 2.",
-      user: {
-        id: 11,
-        username: "Joe Doe",
-      },
-      isFlagged: false,
-    },
-    {
-      id: 3,
-      postId: 3,
-      content: "This is a sample comment 3.",
-      user: {
-        id: 11,
-        username: "Joe Doe",
-      },
-      isFlagged: true,
-    },
-    {
-      id: 4,
-      postId: 1,
-      content: "This is a sample comment 4.",
-      user: {
-        id: 11,
-        username: "Joe Doe",
-      },
-      isFlagged: false,
-    },
-  ];
-  // End of placeholders
+  const comments = db
+    .prepare(
+      `SELECT comments.*, users.username AS username, users.id AS user_id
+      FROM comments
+      INNER JOIN users
+        ON comments.user_id = users.id`
+    )
+    .all();
 
   const showFlagged = req.query.flagged === "true";
+
   res.render("admin", { title: "Admin Dashboard", user, posts, comments, showFlagged });
 });
 
-router.post("/posts/:id/delete", (req, res, next) => {
-  // Delete post logic here
-  res.send(`Delete post id ${req.params.id}`);
+router.post("/posts/delete", (req, res, next) => {
+  const { id, showFlagged } = req.body;
+  db.prepare(`DELETE FROM posts WHERE id = ?`).run(id);
+  res.redirect(`/admin?flagged=${showFlagged}`);
 });
 
-router.post("/posts/:id/unflag", (req, res, next) => {
-  // Unflag post logic here
-  res.send(`Unflag post id ${req.params.id}`);
+router.post("/posts/unflag", (req, res, next) => {
+  const { id, showFlagged } = req.body;
+  db.prepare(`UPDATE posts SET is_flagged = 0 WHERE id = ?`).run(id);
+  res.redirect(`/admin?flagged=${showFlagged}`);
 });
 
-router.post("/comments/:id/delete", (req, res, next) => {
-  // Delete comment logic here
-  res.send(`Delete comment id ${req.params.id}`);
+router.post("/comments/delete", (req, res, next) => {
+  const { id, showFlagged } = req.body;
+  db.prepare(`DELETE FROM comments WHERE id = ?`).run(id);
+  res.redirect(`/admin?flagged=${showFlagged}`);
 });
 
-router.post("/comments/:id/unflag", (req, res, next) => {
-  // unflag comment logic here
-  res.send(`Unflag comment id ${req.params.id}`);
+router.post("/comments/unflag", (req, res, next) => {
+  const { id, showFlagged } = req.body;
+  db.prepare(`UPDATE comments SET is_flagged = 0 WHERE id = ?`).run(id);
+  res.redirect(`/admin?flagged=${showFlagged}`);
 });
 module.exports = router;
