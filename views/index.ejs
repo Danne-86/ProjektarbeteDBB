@@ -1,11 +1,54 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  </body>
+
+<head>
+  <title>
+    <%= title %>
+  </title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+
+  <main class="mx-auto max-w-7xl p-6">
+    <div class="grid grid-cols-7 gap-4">
+      <div class="col-start-1 col-end-8 text-center">
+        <h1 class="text-7xl font-bold mb-7">
+          <%= title %>
+        </h1>
+      </div>
+      <div class="col-start-1 col-end-4">
+        <ul class="text-gray-700">
+          <li>✓ Share your thoughts instantly - no tech skills required.</li>
+          <li>✓ A welcoming community with active moderation.</li>
+          <li>✓ Quick tools to publish posts and updates on the go.</li>
+          <li>✓ Easy sharing of your posts to other social media platforms.</li>
+          <li>✓ A clean, distraction-free writing experience.</li>
+        </ul>
+      </div>
+      <div class="col-span-2 col-end-8">
+        <ul class="text-gray-700">
+          <li>✘ No spam or unwanted ads cluttering your feed.</li>
+          <li>✘ No hate speech, bullying or harassment.</li>
+          <li>✘ No endless technical setups or complex tools.</li>
+          <li>✘ No misleading or harmful content.</li>
+          <li>✘ No data misuse - your privacy is respected.</li>
+        </ul>
+      </div>
+      <div class="col-span-2 col-start-4 col-end-8">
+        <a href="#" data-modal-open="login"
+          class="inline-flex items-center justify-center rounded-md px-5 py-2.5 bg-purple-700 text-white hover:bg-purple-800 shadow-sm">
+          Login
+        </a>
+        <a href="#" data-modal-open="register"
+          class="inline-flex items-center justify-center rounded-md px-5 py-2.5 border-2 border-purple-700 text-purple-700 hover:bg-purple-50">
+          Register
+        </a>
+      </div>
+    </div>
+  </main>
+
+</body>
+
 </html>

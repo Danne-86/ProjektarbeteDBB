@@ -4,7 +4,7 @@ const db = require('../db');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  const select = db.prepare('SELECT * FROM posts');
+  const select = db.prepare('SELECT title, content, post_images FROM posts');
   const posts = select.all();
   res.render('index', { 
     title: 'Inkflow',
