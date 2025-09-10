@@ -1,0 +1,39 @@
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('image');
+    const imagePreview = document.getElementById('imagePreview');
+    const imageUploadBtn = document.getElementById('imageUploadBtn');
+    
+    imageUploadBtn.addEventListener('click', function() {
+    imageInput.click();
+    });
+    
+    imageInput.addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+        const file = this.files[0];
+        
+        if (!file.type.match('image.*')) {
+        alert('Please select an image file (JPEG, PNG, GIF, etc.)');
+        this.value = '';
+        return;
+        }
+        
+        if (file.size > 5 * 1024 * 1024) {
+        alert('Image must be less than 5MB');
+        this.value = '';
+        return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+        imagePreview.src = e.target.result;
+        imagePreview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+        
+        imageUploadBtn.classList.remove('bg-gray-300');
+        imageUploadBtn.classList.add('bg-gray-500', 'text-white');
+    }
+    });
+});
+</script>
