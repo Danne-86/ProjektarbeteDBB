@@ -9,13 +9,13 @@
   </head>
   <body class="bg-gray-50 min-h-screen">
   
-    <!-- Header -->
+    <!-- TODO: Header -->
 
    <main class="mx-auto max-w-7xl p-6">
     <h1 class="text-2xl font-bold mb-2"><%= title %></h1>
     <p class="text-gray-700">Hello, <%= user.username %>! You have administrative privileges.</p>
   
-    <form method="GET" action="/admin" class="mb-6">
+    <form method="GET" action="/admin" class="my-6">
       <input type="hidden" name="flagged" value="<%= showFlagged ? false : true %>">
       <button
         type="submit"
@@ -29,14 +29,19 @@
     const filteredComments = showFlagged ? comments.filter(comment => comment.is_flagged) : comments;
     const filteredPosts = showFlagged ? posts.filter(post => post.is_flagged || filteredComments.some(comment => comment.post_id === post.id)) : posts;
     %>
-    
+
+    <!-- TODO: Replace onsubmit confirm with modal -->
     <% filteredPosts.forEach((post) => { %>
       <div class="bg-white p-6 rounded-lg shadow mb-6">
-      <h2 class="text-xl font-bold mb-2"><%= post.title %></h3>
+      <div class="flex flex-row m-4 gap-2 items-center">
+        <!-- TODO: Replace default avatar -->
+        <img src="<%= post.user_avatar ? post.user_avatar : 'https://placehold.co/50x50.png' %>" class="shrink-0 rounded-full object-cover object-center ring-1 ring-gray-300 size-10 sm:size-12" />
+        <h2 class="text-xl font-bold mb-2"><%= post.title %></h2>
+      </div>
       <p>
         <%= post.content %>
-              <p><small>Written by <%= post.username %></small></p>
-        <div style="display: flex; flex-direction: row; gap: 10px; align-items: center;">
+          <p><small>Written by <%= post.username %></small></p>
+          <div class="flex flex-row gap-2 items-center">
           <form action="/admin/posts/delete" method="POST" onsubmit="return confirm('Do you really want to delete <%= post.title %>?')"><input type="hidden" name="showFlagged" value="<%= showFlagged %>"><button class="px-4 py-2 border rounded bg-white hover:bg-gray-50" type="submit" name="id" value="<%= post.id %>">🗑️</button></form>
           <% if (post.is_flagged == true) { %>
           <span>🚩</span>
@@ -46,12 +51,20 @@
       </p>
 
       <h3 class="text-lg font-bold m-2">Comments</h3>
+      <% if (!filteredComments.some(comment => comment.post_id === post.id)) { %>
+        <div class="ml-4">
+          <small>No comments yet</small>
+        </div>
+      <% } %>
 
+    <!-- TODO: Replace onsubmit confirm with modal -->
       <% filteredComments.forEach((comment) => { %>
       <% if (comment.post_id === post.id) { %>
       <div class="ml-4">
         <p>
           <div class="flex flex-row gap-2 items-center">
+            <!-- TODO: Replace default avatar -->
+            <img src="<%= comment.user_avatar ? comment.user_avatar : 'https://placehold.co/50x50.png' %>" class="shrink-0 rounded-full object-cover object-center ring-1 ring-gray-300 size-6 sm:size-8" />
             <small><%= comment.username %></small>
             <p><%= comment.content %></p>
             
@@ -60,10 +73,8 @@
             <span>🚩</span>
             <form action="/admin/comments/unflag" method="POST" onsubmit="return confirm('Do you really want to unflag comment?\n <%= comment.content %>')"><input type="hidden" name="showFlagged" value="<%= showFlagged %>"><button class="px-4 py-2 border rounded bg-white hover:bg-gray-50" type="submit" name="id" value="<%= comment.id %>">Unflag</button></form>
             <% } %>
-
           </div>
         </p>
-
       </div>
       <%}}) %>
     </div>

@@ -3,24 +3,26 @@ const router = express.Router();
 
 const db = require("../db");
 
-/* GET admin dashboard page. */
-router.get("/", (req, res, next) => {
-  // const { user } = req.session ? req.session : {}; // Uncomment when session is implemented
+router.use((req, res, next) => {
+  // TODO: Uncomment when session is implemented
+  // const { user } = req.session ? req.session : {};
 
-  // Placeholder for demonstration
-  const user = {
-    username: "Lorem Ipsum",
-    is_admin: true,
-  };
+  // TODO: Remove placeholder for demonstration
+  const user = db.prepare(`SELECT * FROM users WHERE id = ?`).get(2);
+  req.user = user;
   // End of placeholder
 
-  if (!user || !user.is_admin) {
+  if (!user.is_admin) {
     return res.status(403).send("Access denied");
   }
+  next();
+});
 
+/* GET admin dashboard page. */
+router.get("/", (req, res, next) => {
   const posts = db
     .prepare(
-      `SELECT posts.*, users.username AS username, users.id AS user_id
+      `SELECT posts.*, users.username AS username, users.id AS user_id, users.avatar AS user_avatar
       FROM posts
       INNER JOIN users
         ON posts.user_id = users.id`
@@ -29,15 +31,15 @@ router.get("/", (req, res, next) => {
 
   const comments = db
     .prepare(
-      `SELECT comments.*, users.username AS username, users.id AS user_id
+      `SELECT comments.*, users.username AS username, users.id AS user_id, users.avatar AS user_avatar
       FROM comments
       INNER JOIN users
         ON comments.user_id = users.id`
     )
     .all();
 
+  const { user } = req;
   const showFlagged = req.query.flagged === "true";
-
   res.render("admin", { title: "Admin Dashboard", user, posts, comments, showFlagged });
 });
 
