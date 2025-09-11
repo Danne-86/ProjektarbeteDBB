@@ -1,11 +1,11 @@
 <div class="carousel-card">
-    <% posts.forEach(post=> { %>
+    <% const post=posts[0] %>
         <h1>
             <%= post.title %>
         </h1>
-        <img src="<%= post.post_images %>" alt="<%= post.title %>">
+        <img src="<%= post.post_images %>" alt="/image1.jpg">
         <p>
             <%= post.content %>
         </p>
-        <% }) %>
+
 </div>

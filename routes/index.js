@@ -4,12 +4,15 @@ const db = require('../db');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  const select = db.prepare('SELECT title, content, post_images FROM posts');
-  const posts = select.all();
-  res.render('index', { 
-    title: 'Inkflow',
-    posts
-   });
+  db.all('Select title, content, post_images FROM posts', [], (err, posts) => {
+    if (err) {
+      return next(err);
+    }
+    res.render('index', {
+      title: 'Inkflow',
+      posts
+    });
+  });
 });
 
 module.exports = router;
