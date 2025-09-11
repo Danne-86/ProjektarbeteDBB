@@ -4,11 +4,13 @@ const router = express.Router();
 const db = require("../db");
 
 router.use((req, res, next) => {
-  // TODO: Uncomment when session is implemented
-  // const { user } = req.session ? req.session : {};
+  // const { user } = req.session ? req.session : {};  // TODO: Uncomment when session is implemented
 
   // TODO: Remove placeholder for demonstration
-  const user = db.prepare(`SELECT * FROM users WHERE id = ?`).get(2);
+  const user = {
+    username: "lorem ipsum",
+    is_admin: true,
+  };
   req.user = user;
   // End of placeholder
 
@@ -18,7 +20,6 @@ router.use((req, res, next) => {
   next();
 });
 
-/* GET admin dashboard page. */
 router.get("/", (req, res, next) => {
   const posts = db
     .prepare(
@@ -44,26 +45,23 @@ router.get("/", (req, res, next) => {
 });
 
 router.post("/posts/delete", (req, res, next) => {
-  const { id, showFlagged } = req.body;
-  db.prepare(`DELETE FROM posts WHERE id = ?`).run(id);
-  res.redirect(`/admin?flagged=${showFlagged}`);
+  //TODO: Backend logic for delete post route
+  res.send(`delete post route id: ${req.body.id}`);
 });
 
 router.post("/posts/unflag", (req, res, next) => {
-  const { id, showFlagged } = req.body;
-  db.prepare(`UPDATE posts SET is_flagged = 0 WHERE id = ?`).run(id);
-  res.redirect(`/admin?flagged=${showFlagged}`);
+  //TODO: Backend logic for unflag post route
+  res.send(`unflag post route id: ${req.body.id}`);
 });
 
 router.post("/comments/delete", (req, res, next) => {
-  const { id, showFlagged } = req.body;
-  db.prepare(`DELETE FROM comments WHERE id = ?`).run(id);
-  res.redirect(`/admin?flagged=${showFlagged}`);
+  //TODO: Backend logic for delete comment route
+  res.send(`delete comment route id: ${req.body.id}`);
 });
 
 router.post("/comments/unflag", (req, res, next) => {
-  const { id, showFlagged } = req.body;
-  db.prepare(`UPDATE comments SET is_flagged = 0 WHERE id = ?`).run(id);
-  res.redirect(`/admin?flagged=${showFlagged}`);
+  //TODO: Backend logic for unflag comment route
+  res.send(`unflag  comment route id: ${req.body.id}`);
 });
+
 module.exports = router;
