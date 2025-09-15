@@ -6,3 +6,61 @@ body {
 a {
   color: #00B7FF;
 }
+
+.carousel {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    display: none;
+}
+
+.carousel-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.carousel-track {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none; 
+}
+
+.carousel-track::-webkit-scrollbar {
+    display: none; /* Döljer scrollbar för Webkit-baserade browsers !!läs safari!! */
+}
+
+.carousel-item {
+    flex: 0 0 calc(100% / 3 - 1rem); /* Visar 3 bilder åt gången */
+    text-align: center;
+    scroll-snap-align: start;
+}
+
+.carousel-item img {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.carousel-button {
+    background-color: black;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
+.prev {
+    left: 10px;
+}
+
+.next {
+    right: 10px;
+}

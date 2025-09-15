@@ -1,17 +1,14 @@
-var express = require('express');
-var router = express.Router();
-const db = require('../db');
+const express = require('express');
+const router = express.Router();
+const db = require('better-sqlite3')('database.db');
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  db.all('Select title, content, post_images FROM posts', [], (err, posts) => {
-    if (err) {
-      return next(err);
-    }
-    res.render('index', {
-      title: 'Inkflow',
-      posts
-    });
+router.get('/', function (req, res, next) {
+  const posts = db.prepare('SELECT * FROM posts').all();
+
+  res.render('index', {
+    title: 'Inkflow',
+    posts
   });
 });
 

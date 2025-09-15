@@ -1,48 +1,15 @@
-<div class="carousel-card">
-    <% posts.forEach(post=> { %>
-        <h1>
+<a href="posts/<%= post.id %>" class="carousel-item">
+    <div>
+        <h3>
             <%= post.title %>
-        </h1>
-        <img class="w-96 h-64 object-fit" src="<%= post.post_images %>" alt="/image1.jpg">
+        </h3>
+    </div>
+    <div class="relative">
+        <img class="w-96 h-64 object-fit" src="<%= post.image ? post.image : '/img/postplaceholder.jpg' %>" alt="image for <%= post.title %>">
+    </div>
+    <div class="line-clamp-3">
         <p>
-            <!-- <%= post.content %> --> <!-- TODO: remove this later and also get figure out how to display more than one card -->
-            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Incidunt ipsa officia placeat dolore numquam,
-            nihil quaerat minima dignissimos quis vitae similique? Quae distinctio soluta reprehenderit voluptatum,
-            cumque sed consequuntur est! Nisi fuga nam saepe sunt labore tempora odit! Eligendi quos veniam accusantium.
-            Incidunt quisquam impedit minima sint nobis qui voluptate vitae quod quasi dicta quibusdam repellat eius
-            esse reprehenderit delectus molestiae, quia sed suscipit veniam nesciunt id odit aperiam. Voluptatibus,
-            fugit omnis nostrum quas cumque dolores quo ullam? Quae laborum id, a consectetur nam molestias ex, repellat
-            voluptatibus beatae, ratione neque magni quidem accusamus quasi aliquid debitis minima sed tempore labore
-            deserunt. Cumque, aliquam possimus? Ullam obcaecati voluptate adipisci deserunt, fugit eius accusamus
-            numquam ab sapiente ea, dolorum inventore ex dolores expedita beatae aspernatur sint illum distinctio in.
-            Repudiandae velit quibusdam libero eius placeat. Sed, quasi quo eum illum nulla rerum ad labore molestias
-            odit! Fugiat dolorum rerum nesciunt perferendis numquam fugit! Praesentium obcaecati, cumque voluptates quia
-            facilis quae. Sequi assumenda fugit quia distinctio optio. Saepe laboriosam exercitationem dolorum,
-            similique excepturi velit quae ipsa nulla! Animi, facilis. Quia voluptate natus qui quos cumque rerum
-            quisquam ad illo animi commodi nobis impedit, asperiores voluptas deserunt dicta voluptatibus exercitationem
-            ipsam nesciunt atque saepe nisi obcaecati maiores rem corrupti! Eos voluptatum rem unde necessitatibus
-            facilis. Odio ad, nisi iusto, explicabo nihil doloremque quisquam itaque, dignissimos voluptate aliquid
-            blanditiis ut delectus praesentium ea vel incidunt. Iusto, exercitationem veniam asperiores repellat
-            doloribus cumque fuga provident veritatis quia amet numquam deserunt consectetur quidem totam laboriosam
-            nobis molestias! Incidunt adipisci est inventore sapiente doloremque necessitatibus aspernatur iure, nobis
-            quo eaque. Ad cum neque impedit, praesentium nemo delectus at fugiat fugit quis quibusdam rerum consequuntur
-            eaque blanditiis earum incidunt eligendi! Corporis sunt repudiandae corrupti, aspernatur molestiae rerum
-            quis debitis unde necessitatibus in, magni voluptatum quidem? Mollitia non suscipit, quod placeat quos
-            dolores fugiat ut atque ab repudiandae nisi aliquid porro corporis ipsa illum nobis, sapiente fugit et
-            laudantium recusandae fuga reiciendis impedit sequi. Vero dolores repellat deserunt autem ullam, mollitia in
-            quod non reprehenderit reiciendis quibusdam tempora at eum saepe soluta veritatis suscipit nesciunt dolorum
-            odit minima quidem maiores doloribus vel. Sit tempore, sed molestiae harum est laudantium consequuntur quos
-            velit voluptatibus corporis suscipit. Sint velit temporibus, in vel voluptate qui iusto sunt expedita
-            quisquam, deserunt commodi est corrupti sit, amet vitae totam. Inventore delectus saepe, similique corporis
-            adipisci ad iusto incidunt facilis eos minus reiciendis labore sunt, enim minima tenetur, maxime
-            reprehenderit rem cumque distinctio dolores asperiores? Ea voluptatum nostrum quo placeat, animi, dolor
-            minima doloribus voluptate eaque quas, praesentium aperiam. Expedita ea aperiam similique perspiciatis eaque
-            tenetur. Odio tenetur fugit tempora, laboriosam hic architecto veniam non magni quod nisi commodi eaque
-            velit dignissimos mollitia consectetur soluta, natus perspiciatis quibusdam tempore possimus iusto unde
-            debitis delectus! Corporis voluptatem aliquid ratione quam soluta? Repellat perspiciatis veniam, ea ad fuga
-            quisquam doloremque sed omnis iusto vel ex cumque nulla suscipit reprehenderit debitis maxime voluptatibus
-            pariatur quas nihil aspernatur minima asperiores? Deserunt, officia similique? Enim pariatur sed assumenda
-            molestiae distinctio.
+            <%= post.content %>
         </p>
-        <% }) %>
-</div>
+    </div>
+</a>

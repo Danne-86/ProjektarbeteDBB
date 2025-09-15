@@ -7,6 +7,25 @@
   </title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel='stylesheet' href='/stylesheets/style.css' />
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const track = document.querySelector(".carousel-track");
+      const prevButton = document.querySelector(".prev");
+      const nextButton = document.querySelector(".next");
+
+      const itemWidth = document.querySelector(".carousel-item").offsetWidth;
+      const scrollAmount = itemWidth * 1;
+
+      nextButton.addEventListener("click", () => {
+        track.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      });
+
+      prevButton.addEventListener("click", () => {
+        track.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+      });
+    });
+  </script>
 </head>
 
 <body class="bg-gray-50 min-h-screen">
@@ -48,9 +67,20 @@
         </a>
       </div>
     </div>
-    <div class="flex mt-5 w-96 h-96 text-ellipsis overflow-hidden">
-      <%- include('partials/carouselCard', { posts: posts }) %>
-    </div>
+    <section>
+      <div class="carousel-container">
+        <button class="carousel-button prev">&lt;</button>
+        <div class="carousel-track mt-5 text-wrap overflow-hidden">
+          <% const now=new Date(); const visiblePosts=posts.sort(()=> 0.5 - Math.random()).slice(0, 5);
+
+            visiblePosts.forEach(post => {
+            %>
+            <%- include('partials/carouselCard', { post }) %>
+              <% }) %>
+        </div>
+        <button class="carousel-button next">&gt;</button>
+      </div>
+    </section>
   </main>
 
 </body>
