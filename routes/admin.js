@@ -23,7 +23,7 @@ router.use((req, res, next) => {
 router.get("/", (req, res, next) => {
   const posts = db
     .prepare(
-      `SELECT posts.*, users.username AS username, users.id AS user_id, users.avatar AS user_avatar
+      `SELECT posts.*, users.username AS username, users.id AS user_id, users.avatar_url AS user_avatar_url
       FROM posts
       INNER JOIN users
         ON posts.user_id = users.id`
@@ -32,7 +32,7 @@ router.get("/", (req, res, next) => {
 
   const comments = db
     .prepare(
-      `SELECT comments.*, users.username AS username, users.id AS user_id, users.avatar AS user_avatar
+      `SELECT comments.*, users.username AS username, users.id AS user_id, users.avatar_url AS user_avatar_url
       FROM comments
       INNER JOIN users
         ON comments.user_id = users.id`
@@ -41,7 +41,13 @@ router.get("/", (req, res, next) => {
 
   const { user } = req;
   const showFlagged = req.query.flagged === "true";
-  res.render("admin", { title: "Admin Dashboard", user, posts, comments, showFlagged });
+  res.render("admin", {
+    title: "Admin Dashboard",
+    user,
+    posts,
+    comments,
+    showFlagged,
+  });
 });
 
 router.post("/posts/delete", (req, res, next) => {

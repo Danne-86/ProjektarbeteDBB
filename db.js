@@ -3,6 +3,7 @@ const path = require("path");
 const fs = require("fs");
 
 const dbPath = path.join(__dirname, "database.db");
+const db = new Database(dbPath);
 if (!fs.existsSync(dbPath)) {
   fs.writeFileSync(dbPath, "");
 }
@@ -11,8 +12,10 @@ db.exec(`
     CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
-    avatar TEXT,
+    email TEXT NOT NULL UNIQUE,
+    avatar_url TEXT,
     is_admin BOOLEAN DEFAULT FALSE,
+    password_hash TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )
@@ -91,16 +94,6 @@ function all(sql, params, cb) {
     throw err;
   }
 }
-
-run(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL UNIQUE,
-    email TEXT NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`);
 
 module.exports = {
   run,
