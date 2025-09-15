@@ -1,39 +1,60 @@
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+  // Image preview functionality
+  document.addEventListener('DOMContentLoaded', function() {
     const imageInput = document.getElementById('image');
     const imagePreview = document.getElementById('imagePreview');
     const imageUploadBtn = document.getElementById('imageUploadBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const blogForm = document.getElementById('blogForm');
     
-    imageUploadBtn.addEventListener('click', function() {
-    imageInput.click();
-    });
-    
-    imageInput.addEventListener('change', function() {
-    if (this.files && this.files[0]) {
-        const file = this.files[0];
-        
-        if (!file.type.match('image.*')) {
-        alert('Please select an image file (JPEG, PNG, GIF, etc.)');
-        this.value = '';
-        return;
-        }
-        
-        if (file.size > 5 * 1024 * 1024) {
-        alert('Image must be less than 5MB');
-        this.value = '';
-        return;
-        }
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-        imagePreview.src = e.target.result;
-        imagePreview.style.display = 'block';
-        }
-        reader.readAsDataURL(file);
-        
-        imageUploadBtn.classList.remove('bg-gray-300');
-        imageUploadBtn.classList.add('bg-gray-500', 'text-white');
+    // Function to clear image preview
+    function clearImagePreview() {
+      if (imagePreview) {
+        imagePreview.style.display = 'none';
+        imagePreview.src = '';
+      }
+      if (imageInput) {
+        imageInput.value = '';
+      }
     }
-    });
-});
+    
+    // Trigger file input when button is clicked
+    if (imageUploadBtn && imageInput) {
+      imageUploadBtn.addEventListener('click', function() {
+        imageInput.click();
+      });
+    }
+    
+    // Show preview when image is selected
+    if (imageInput && imagePreview) {
+      imageInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            imagePreview.src = e.target.result;
+            imagePreview.style.display = 'block';
+          }
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+    
+    // Handle reset button click - clear image preview too
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function(e) {
+        // Låt formuläret återställas först (standardbeteende)
+        // Sedan rensa bildförhandsvisningen
+        setTimeout(clearImagePreview, 10);
+      });
+    }
+    
+    // Also handle form reset event for good measure
+    if (blogForm) {
+      blogForm.addEventListener('reset', function() {
+        // Clear the image preview when form is reset
+        setTimeout(clearImagePreview, 10);
+      });
+    }
+  });
 </script>
