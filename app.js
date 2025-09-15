@@ -23,7 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-const blogpageRoutes = require('./routes/blogpage');
+const blogpageRoutes = require('./routes/index');
 app.use('/', blogpageRoutes);
 
 // catch 404 and forward to error handler
