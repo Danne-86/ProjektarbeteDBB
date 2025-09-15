@@ -45,13 +45,6 @@ db.exec(`
   )
     `);
 
-const _db = new Database(dbPath);
-
-try {
-  _db.pragma("journal_mode = WAL");
-  _db.pragma("synchronous = NORMAL");
-} catch (_) {}
-
 function _normalizeArgs(sql, params, cb) {
   if (typeof params === "function") {
     return { sql, params: [], cb: params };
@@ -62,7 +55,7 @@ function _normalizeArgs(sql, params, cb) {
 function run(sql, params, cb) {
   const { sql: s, params: p, cb: done } = _normalizeArgs(sql, params, cb);
   try {
-    const info = _db.prepare(s).run(...p);
+    const info = db.prepare(s).run(...p);
     if (typeof done === "function") done(null);
     return info;
   } catch (err) {
@@ -74,7 +67,7 @@ function run(sql, params, cb) {
 function get(sql, params, cb) {
   const { sql: s, params: p, cb: done } = _normalizeArgs(sql, params, cb);
   try {
-    const row = _db.prepare(s).get(...p);
+    const row = db.prepare(s).get(...p);
     if (typeof done === "function") done(null, row);
     return row;
   } catch (err) {
@@ -86,7 +79,7 @@ function get(sql, params, cb) {
 function all(sql, params, cb) {
   const { sql: s, params: p, cb: done } = _normalizeArgs(sql, params, cb);
   try {
-    const rows = _db.prepare(s).all(...p);
+    const rows = db.prepare(s).all(...p);
     if (typeof done === "function") done(null, rows);
     return rows;
   } catch (err) {
@@ -99,6 +92,6 @@ module.exports = {
   run,
   get,
   all,
-  prepare: (sql) => _db.prepare(sql),
-  _raw: _db,
+  prepare: (sql) => db.prepare(sql),
+  _raw: db,
 };
