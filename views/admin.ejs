@@ -32,7 +32,7 @@
       <div class="bg-white p-6 rounded-lg shadow mb-6">
       <div class="flex flex-row m-4 gap-2 items-center">
         <!-- TODO: Replace default avatar -->
-        <img src="<%= post.user_avatar ? post.user_avatar : "/img/avatar.jpeg" %>" class="shrink-0 rounded-full object-cover object-center ring-1 ring-gray-300 size-10 sm:size-12" />
+        <img src="<%= post.user_avatar ? post.user_avatar_url : "/img/avatar.jpeg" %>" class="shrink-0 rounded-full object-cover object-center ring-1 ring-gray-300 size-10 sm:size-12" />
         <h2 class="text-xl font-bold mb-2"><%= post.title %></h2>
       </div>
       <p>
@@ -61,7 +61,7 @@
         <p>
           <div class="flex flex-row gap-2 items-center">
             <!-- TODO: Replace default avatar -->
-            <img src="<%= comment.user_avatar ? comment.user_avatar : "/img/avatar.jpeg" %>" class="shrink-0 rounded-full object-cover object-center ring-1 ring-gray-300 size-6 sm:size-8" />
+            <img src="<%= comment.user_avatar ? comment.user_avatar_url : "/img/avatar.jpeg" %>" class="shrink-0 rounded-full object-cover object-center ring-1 ring-gray-300 size-6 sm:size-8" />
             <small><%= comment.username %></small>
             <p><%= comment.content %></p>
             
