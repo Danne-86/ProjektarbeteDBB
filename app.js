@@ -10,6 +10,7 @@ const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const authRouter = require("./routes/auth");
 const adminRouter = require("./routes/admin");
+const profileRouter = require("./routes/profile");
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/", authRouter);
 app.use("/admin", adminRouter);
+app.use("/profile", profileRouter);
 
 // 404
 app.use(function (req, res, next) {
