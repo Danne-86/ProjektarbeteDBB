@@ -23,24 +23,26 @@ router.use((req, res, next) => {
 router.get("/", (req, res, next) => {
   const posts = db
     .prepare(
-      `SELECT posts.*, users.username AS username, users.id AS user_id, users.avatar AS user_avatar
+      `SELECT posts.*, users.username AS username, users.id AS user_id
       FROM posts
       INNER JOIN users
-        ON posts.user_id = users.id`
+        ON posts.user_id = users.id
+      ORDER BY posts.created_at DESC`
     )
     .all();
 
   const comments = db
     .prepare(
-      `SELECT comments.*, users.username AS username, users.id AS user_id, users.avatar AS user_avatar
+      `SELECT comments.*, users.username AS username, users.id AS user_id
       FROM comments
       INNER JOIN users
-        ON comments.user_id = users.id`
+        ON comments.user_id = users.id
+      ORDER BY comments.created_at DESC`
     )
     .all();
 
   const { user } = req;
-  const showFlagged = req.query.flagged === "true";
+  const showFlagged = req.query.flagged !== "false";
   res.render("admin", { title: "Admin Dashboard", user, posts, comments, showFlagged });
 });
 

@@ -5,10 +5,11 @@ db.exec(`
     CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
-    avatar TEXT,
+    password_hash TEXT NOT NULL,
+    avatar_url TEXT,
     is_admin BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME
   )
     `);
 db.exec(`
@@ -19,7 +20,7 @@ db.exec(`
     content TEXT NOT NULL,
     is_flagged BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME,
     FOREIGN KEY(user_id) REFERENCES users(id)
   )
         `);
@@ -30,7 +31,7 @@ db.exec(`
     post_id INTEGER NOT NULL,
     is_flagged BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME,
     FOREIGN KEY(user_id) REFERENCES users(id),
     FOREIGN KEY(post_id) REFERENCES posts(id)
   )
