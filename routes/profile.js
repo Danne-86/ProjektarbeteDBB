@@ -52,11 +52,10 @@ router.get("/", authenticateToken, (req, res) => {
  * POST /profile
  */
 router.post("/", authenticateToken, (req, res) => {
-  const { username, email, bio } = req.body;
+  const { username, bio } = req.body; // removed email
   try {
-    db.run("UPDATE users SET username = ?, email = ?, bio = ? WHERE id = ?", [
+    db.run("UPDATE users SET username = ?, bio = ? WHERE id = ?", [
       username,
-      email,
       bio,
       req.user.id,
     ]);
@@ -74,7 +73,7 @@ router.post("/", authenticateToken, (req, res) => {
     } catch {}
     res.status(400).render("profile", {
       title: "Your Profile",
-      user: { ...current, username, email, bio },
+      user: { ...current, username, bio },
       isAuthenticated: true,
       error: "Could not update profile. " + (err.message || err),
     });
