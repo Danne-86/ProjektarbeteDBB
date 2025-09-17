@@ -1,7 +1,6 @@
 // middleware/upload.js
 const multer = require("multer");
 const path = require("path");
-const { post } = require("../routes");
 
 // Avatar storage
 const avatarStorage = multer.diskStorage({
