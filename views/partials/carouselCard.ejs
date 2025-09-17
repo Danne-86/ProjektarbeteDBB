@@ -1,11 +1,16 @@
-<a href="posts/<%= post.id %>" class="carousel-item">
-    <div>
+<a href="posts/<%= post.id %>" class="carousel-item flex-[0_0_calc(100%_/1_-_1rem)] lg:flex-[0_0_calc(100%_/_3_-_1rem)] text-center snap-start">
+    <div class="grid grid-cols-3 space-between bg-[#A7ADBA]">
+                <img
+            src="/img/postplaceholder.jpg"
+            alt=""
+            class="m-1 shrink-0 rounded-full object-cover object-center ring-1 ring-gray-300
+                  size-5" />
         <h3>
             <%= post.title %>
         </h3>
     </div>
     <div class="relative">
-        <img class="w-96 h-64 object-fit" src="<%= post.image ? post.image : '/img/postplaceholder.jpg' %>" alt="image for <%= post.title %>">
+        <img class="w-full h-64 rounded-b-lg object-fit" src="<%= post.post_images ? post.post_images : '/img/postplaceholder.jpg' %>" alt="image for <%= post.title %>">
     </div>
     <div class="line-clamp-3">
         <p>

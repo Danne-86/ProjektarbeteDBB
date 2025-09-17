@@ -34,17 +34,6 @@ a {
     display: none; /* Döljer scrollbar för Webkit-baserade browsers !!läs safari!! */
 }
 
-.carousel-item {
-    flex: 0 0 calc(100% / 3 - 1rem); /* Visar 3 bilder åt gången */
-    text-align: center;
-    scroll-snap-align: start;
-}
-
-.carousel-item img {
-    width: 100%;
-    border-radius: 8px;
-}
-
 .carousel-button {
     background-color: black;
     color: white;
