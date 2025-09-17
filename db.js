@@ -8,6 +8,8 @@ if (!fs.existsSync(dbPath)) {
   fs.writeFileSync(dbPath, "");
 }
 
+db.exec("PRAGMA foreign_keys = ON;");
+
 db.exec(`
     CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,11 +39,12 @@ db.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     post_id INTEGER NOT NULL,
+    content TEXT NOT NULL,
     is_flagged BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME,
     FOREIGN KEY(user_id) REFERENCES users(id),
-    FOREIGN KEY(post_id) REFERENCES posts(id)
+    FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE
   )
     `);
 

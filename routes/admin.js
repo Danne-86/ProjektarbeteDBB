@@ -37,23 +37,27 @@ router.get("/", (req, res, next) => {
 });
 
 router.post("/posts/delete", (req, res, next) => {
-  //TODO: Backend logic for delete post route
-  res.send(`delete post route id: ${req.body.id}`);
+  const { id, showFlagged } = req.body;
+  db.prepare(`DELETE FROM posts WHERE id = ?`).run(id);
+  res.redirect(`/admin?flagged=${showFlagged}`);
 });
 
 router.post("/posts/unflag", (req, res, next) => {
-  //TODO: Backend logic for unflag post route
-  res.send(`unflag post route id: ${req.body.id}`);
+  const { id, showFlagged } = req.body;
+  db.prepare(`UPDATE posts SET is_flagged = 0 WHERE id = ?`).run(id);
+  res.redirect(`/admin?flagged=${showFlagged}`);
 });
 
 router.post("/comments/delete", (req, res, next) => {
-  //TODO: Backend logic for delete comment route
-  res.send(`delete comment route id: ${req.body.id}`);
+  const { id, showFlagged } = req.body;
+  db.prepare(`DELETE FROM comments WHERE id = ?`).run(id);
+  res.redirect(`/admin?flagged=${showFlagged}`);
 });
 
 router.post("/comments/unflag", (req, res, next) => {
-  //TODO: Backend logic for unflag comment route
-  res.send(`unflag  comment route id: ${req.body.id}`);
+  const { id, showFlagged } = req.body;
+  db.prepare(`UPDATE comments SET is_flagged = 0 WHERE id = ?`).run(id);
+  res.redirect(`/admin?flagged=${showFlagged}`);
 });
 
 module.exports = router;
