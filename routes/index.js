@@ -1,35 +1,11 @@
 var express = require('express');
 var router = express.Router();
-var multer = require('multer');
 var path = require('path');
 
-// Configure Multer for image uploads
-var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/img/');
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'blog-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-// File filter for images only
-var fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only image files are allowed!'), false);
-  }
-};
-
-var upload = multer({ 
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  }
-});
+const { uploadPostImage } = require("../middleware/upload");
+const e = require('express');
+const { error } = require('console');
+const { authenticateToken } = require("../middleware/auth");
 
 // GET blog page
 router.get('/blog', (req, res) => {
@@ -40,37 +16,65 @@ router.get('/blog', (req, res) => {
   });
 });
 
+
+
 // POST handle blog creation with image upload
-router.post('/blog/create', upload.single('image'), (req, res) => {
-  try {
-    const { title, content } = req.body;
-    let imagePath = null;
-    
-    // Check if image was uploaded
-    if (req.file) {
-      imagePath = '/images/' + req.file.filename;
+router.post('/blog/create', AuthenticateToken, (req, res) => {
+  uploadPostImage(req, res, (err) => {
+    if (err) {
+      if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.render('blogpage', {
+            title: 'Create Blog Post',
+            user: req.user,
+            isAuthenticated: true,
+            errorMessage: 'File size too large. Maximum size is 10MB.'
+          });
+        } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+          return res.render('blogpage', {
+            title: 'Create Blog Post',
+            user: req.user,
+            isAuthenticated: true,
+            errorMessage: 'Too many files. Maximum 5 images allowed.'
+          });
+        }
+      }
+      return res.render('blogpage', {
+        title: 'Create Blog Post',
+        user: req.user,
+        isAuthenticated: true,
+        errorMessage: 'Error uploading image: ' + err.message
+      });
     }
-    
-    // Here you would save to your database including the imagePath
-    console.log('Received blog post:', { title, content, imagePath });
-    
-    // Render the page with success message
-    res.render('blogpage', {
-      title: 'Create Blog Post',
-      successMessage: 'Your blog post has been published successfully!',
-      errorMessage: null
-    });
-    
-  } catch (error) {
-    console.error('Error creating blog post:', error);
-    
-    // Render the page with error message
-    res.render('blogpage', {
-      title: 'Create Blog Post',
-      successMessage: null,
-      errorMessage: 'Error creating blog post: ' + error.message
-    });
-  }
+
+    try {
+      const { title, content } = req.body;
+      let imagePaths = [];
+
+      // Check if images were uploaded (using req.files instead of req.file)
+      if (req.files && req.files.length > 0) {
+        // Map all uploaded files to their paths
+        imagePaths = req.files.map(file => '/posts/' + file.filename);
+      } else {
+        return res.render('blogpage', {
+          title: 'Create Blog Post',
+          user: req.user,
+          isAuthenticated: true,
+          errorMessage: "No images uploaded"
+        });
+      }
+
+      // Continue with saving the blog post, etc.
+      // res.render('blogpage', { ...successMessage... });
+    } catch (error) {
+      return res.render('blogpage', {
+        title: 'Create Blog Post',
+        user: req.user,
+        isAuthenticated: true,
+        errorMessage: 'Error: ' + error.message
+      });
+    }
+  });
 });
 
 // Error handling middleware for Multer
@@ -80,7 +84,7 @@ router.use((error, req, res, next) => {
       return res.render('blogpage', {
         title: 'Create Blog Post',
         successMessage: null,
-        errorMessage: 'File size too large. Maximum size is 5MB.'
+        errorMessage: 'File size too large. Maximum size is 10MB.'
       });
     }
   } else if (error) {
