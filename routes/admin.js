@@ -33,7 +33,7 @@ router.get("/", (req, res, next) => {
 
   const { user } = req;
   const showFlagged = req.query.flagged !== "false";
-  res.render("admin", { title: "Admin Dashboard", user, posts, comments, showFlagged });
+  res.render("admin", { title: "Admin Dashboard", _user: user, posts, comments, showFlagged });
 });
 
 router.post("/posts/delete", (req, res, next) => {

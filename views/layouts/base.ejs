@@ -1,143 +1,189 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" class="h-full">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="/assets/tailwind.css" />
-  <style>
-    :root{
-      --header-h: 64px;     /* set dynamically below */
-      --rail-w: 12rem;      /* used for both side rails */
-    }
-  </style>
-</head>
-<body class="min-h-dvh bg-neutral-50 text-neutral-900 flex flex-col">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="/assets/tailwind.css" />
+    <style>
+      :root {
+        --header-h: 64px; /* set dynamically below */
+        --rail-w: 12rem; /* used for both side rails */
+      }
+    </style>
+  </head>
+  <body class="min-h-dvh bg-neutral-50 text-neutral-900 flex flex-col">
+    <% const _isAuth = (typeof isAuthenticated !== 'undefined' && isAuthenticated) ? true : false; const _user
+    = (typeof user !== 'undefined' && user) ? user : null; const _avatar = (_user && _user.avatar_url) ?
+    _user.avatar_url : '/avatars/SpongeBob_SquarePants_character.png'; %>
 
-  <%
-    const _isAuth = (typeof isAuthenticated !== 'undefined' && isAuthenticated) ? true : false;
-    const _user = (typeof user !== 'undefined' && user) ? user : null;
-    const _avatar = (_user && _user.avatar_url)
-      ? _user.avatar_url
-      : '/avatars/SpongeBob_SquarePants_character.png';
-  %>
-
-  <header id="site-header" class="sticky top-0 z-50 w-full bg-white border-b border-gray-200">
-    <div class="w-full bg-white">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3">
-        <p class="text-center font-semibold text-purple-700 text-[clamp(14px,2vw,20px)]">
-          Where thoughts find their rhythm and words find their home
-        </p>
+    <header id="site-header" class="sticky top-0 z-50 w-full bg-white border-b border-gray-200">
+      <div class="w-full bg-white">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3">
+          <p class="text-center font-semibold text-purple-700 text-[clamp(14px,2vw,20px)]">
+            Where thoughts find their rhythm and words find their home
+          </p>
+        </div>
       </div>
-    </div>
 
-    <div class="mx-auto overflow-hidden max-w-7xl px-4 sm:px-6 max-h-20 lg:px-8 py-3 flex items-center justify-between gap-4 max-h-40">
-      <a href="/" class="inline-flex items-center">
-        <img src="logos/InkFlow_logo.jpg" alt="InkFlow" class="select-none" />
-        <span class="sr-only">Back to homepage</span>
-      </a>
+      <div
+        class="mx-auto overflow-hidden max-w-7xl px-4 sm:px-6 max-h-20 lg:px-8 py-3 flex items-center justify-between gap-4 max-h-40"
+      >
+        <a href="/" class="inline-flex items-center">
+          <img src="logos/InkFlow_logo.jpg" alt="InkFlow" class="select-none" />
+          <span class="sr-only">Back to homepage</span>
+        </a>
 
-      <% if (_isAuth) { %>
+        <% if (_isAuth) { %>
         <div class="flex items-center gap-4">
           <a href="/profile" class="inline-flex items-center">
             <img
               src="<%= _avatar %>"
               alt="<%= _user ? _user.username : 'User' %> avatar"
-              class="shrink-0 rounded-full object-cover object-center ring-1 ring-gray-300 size-10 sm:size-12" />
+              class="shrink-0 rounded-full object-cover object-center ring-1 ring-gray-300 size-10 sm:size-12"
+            />
             <span class="sr-only">Profile</span>
           </a>
         </div>
-      <% } else { %>
+        <% } else { %>
         <div class="hidden sm:flex items-center gap-2">
-          <a href="#" data-modal-open="login"
-            class="inline-flex items-center justify-center rounded-md px-5 py-2.5 bg-purple-700 text-white hover:bg-purple-800 shadow-sm">
+          <a
+            href="#"
+            data-modal-open="login"
+            class="inline-flex items-center justify-center rounded-md px-5 py-2.5 bg-purple-700 text-white hover:bg-purple-800 shadow-sm"
+          >
             Login
           </a>
-          <a href="#" data-modal-open="register"
-            class="inline-flex items-center justify-center rounded-md px-5 py-2.5 border-2 border-purple-700 text-purple-700 hover:bg-purple-50">
+          <a
+            href="#"
+            data-modal-open="register"
+            class="inline-flex items-center justify-center rounded-md px-5 py-2.5 border-2 border-purple-700 text-purple-700 hover:bg-purple-50"
+          >
             Register
           </a>
         </div>
-      <% } %>
-    </div>
+        <% } %>
+      </div>
 
-    <nav class="bg-gray-50 border-t border-gray-200">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="hidden md:flex lg:hidden items-center justify-between py-3">
-          <ul class="flex items-center space-x-8">
-            <li><a href="/" class="text-gray-700 hover:text-gray-900">Home</a></li>
-          </ul>
-          <ul class="flex items-center space-x-8">
-            <% if (_isAuth) { %>
+      <nav class="bg-gray-50 border-t border-gray-200">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div class="hidden md:flex lg:hidden items-center justify-between py-3">
+            <ul class="flex items-center space-x-8">
+              <li><a href="/" class="text-gray-700 hover:text-gray-900">Home</a></li>
+            </ul>
+            <ul class="flex items-center space-x-8">
+              <% if (_isAuth) { %>
               <li><a href="/" class="text-gray-700 hover:text-gray-900">New post</a></li>
               <li><a href="/profile" class="text-gray-700 hover:text-gray-900">Profile options</a></li>
               <li><a href="/" class="text-gray-700 hover:text-gray-900">Follower options</a></li>
               <li><a href="/logout" class="text-gray-700 hover:text-gray-900">Logout</a></li>
-            <% } %>
-          </ul>
+              <% if (_user?.is_admin) { %>
+              <li class="border-l pl-8">
+                <a href="/admin" class="text-gray-700 hover:text-gray-900">Admin</a>
+              </li>
+              <% } %> <% } %>
+            </ul>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
 
-    <button
-      id="fabBtn"
-      class="md:hidden fixed bottom-4 right-4 z-30 inline-flex items-center justify-center rounded-full border border-gray-300 shadow-lg bg-white hover:bg-gray-50 w-14 h-14"
-      aria-controls="fabMenu" aria-expanded="false" aria-haspopup="true">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-          viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"/>
-      </svg>
-      <span class="sr-only">Open menu</span>
-    </button>
+      <button
+        id="fabBtn"
+        class="md:hidden fixed bottom-4 right-4 z-30 inline-flex items-center justify-center rounded-full border border-gray-300 shadow-lg bg-white hover:bg-gray-50 w-14 h-14"
+        aria-controls="fabMenu"
+        aria-expanded="false"
+        aria-haspopup="true"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <span class="sr-only">Open menu</span>
+      </button>
 
-    <div id="fabBackdrop" class="md:hidden fixed inset-0 z-20 hidden"></div>
+      <div id="fabBackdrop" class="md:hidden fixed inset-0 z-20 hidden"></div>
 
-    <div id="fabMenu"
-        class="md:hidden fixed z-30 bottom-[4.25rem] right-4 w-56 origin-bottom-right transform
-              rounded-xl border border-gray-200 bg-white shadow-xl
-              opacity-0 scale-95 pointer-events-none transition ease-out duration-200">
-      <ul class="py-2">
-        <li><a href="/" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">Home</a></li>
-        <% if (_isAuth) { %>
+      <div
+        id="fabMenu"
+        class="md:hidden fixed z-30 bottom-[4.25rem] right-4 w-56 origin-bottom-right transform rounded-xl border border-gray-200 bg-white shadow-xl opacity-0 scale-95 pointer-events-none transition ease-out duration-200"
+      >
+        <ul class="py-2">
+          <li><a href="/" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">Home</a></li>
+          <% if (_isAuth) { %>
           <li><a href="/" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">New post</a></li>
-          <li><a href="/profile" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">Profile options</a></li>
+          <li>
+            <a href="/profile" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">Profile options</a>
+          </li>
           <li><a href="/" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">Follower options</a></li>
           <li><a href="/logout" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">Logout</a></li>
-        <% } else { %>
-          <li><a href="#" data-modal-open="login" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">Login</a></li>
-          <li><a href="#" data-modal-open="register" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">Register</a></li>
-        <% } %>
-      </ul>
-    </div>
+          <% if (_user?.is_admin) { %>
+          <li class="border-t">
+            <a href="/admin" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">Admin</a>
+          </li>
+          <% } %> <% } else { %>
+          <li>
+            <a href="#" data-modal-open="login" class="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+              >Login</a
+            >
+          </li>
+          <li>
+            <a href="#" data-modal-open="register" class="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+              >Register</a
+            >
+          </li>
+          <% } %>
+        </ul>
+      </div>
 
-    <% if (!_isAuth) { %>
+      <% if (!_isAuth) { %>
       <div id="modalOverlay" class="fixed inset-0 bg-black/50 hidden z-40"></div>
 
       <!-- Login Modal -->
       <div id="modal-login" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
         <div class="mx-auto w-full max-w-2xl rounded-xl bg-[#eff1f7] shadow-xl ring-1 ring-gray-300">
           <div class="flex items-center justify-end px-4 pt-3">
-            <button class="p-2 text-gray-700 hover:text-gray-900" data-modal-close aria-label="Close">✕</button>
+            <button class="p-2 text-gray-700 hover:text-gray-900" data-modal-close aria-label="Close">
+              ✕
+            </button>
           </div>
           <form method="POST" action="/login" class="px-8 pb-8">
             <div class="space-y-6">
               <div>
                 <label for="login-email" class="block text-sm text-gray-700 mb-1">E-mail</label>
-                <input id="login-email" name="email" type="email" required
-                      class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600" />
+                <input
+                  id="login-email"
+                  name="email"
+                  type="email"
+                  required
+                  class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600"
+                />
               </div>
               <div>
                 <label for="login-password" class="block text-sm text-gray-700 mb-1">Password</label>
-                <input id="login-password" name="password" type="password" required
-                      class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600" />
+                <input
+                  id="login-password"
+                  name="password"
+                  type="password"
+                  required
+                  class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600"
+                />
               </div>
             </div>
             <div class="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
-              <button class="inline-flex justify-center rounded-md px-6 py-2.5 bg-purple-700 text-white hover:bg-purple-800">
+              <button
+                class="inline-flex justify-center rounded-md px-6 py-2.5 bg-purple-700 text-white hover:bg-purple-800"
+              >
                 Login
               </button>
-              <a href="#" data-modal-open="register"
-                class="inline-flex justify-center rounded-md px-6 py-2.5 border-2 border-purple-700 text-purple-700 hover:bg-purple-50">
+              <a
+                href="#"
+                data-modal-open="register"
+                class="inline-flex justify-center rounded-md px-6 py-2.5 border-2 border-purple-700 text-purple-700 hover:bg-purple-50"
+              >
                 Register
               </a>
             </div>
@@ -149,178 +195,254 @@
       <div id="modal-register" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
         <div class="mx-auto w-full max-w-2xl rounded-xl bg-[#eff1f7] shadow-xl ring-1 ring-gray-300">
           <div class="flex items-center justify-end px-4 pt-3">
-            <button class="p-2 text-gray-700 hover:text-gray-900" data-modal-close aria-label="Close">✕</button>
+            <button class="p-2 text-gray-700 hover:text-gray-900" data-modal-close aria-label="Close">
+              ✕
+            </button>
           </div>
           <form method="POST" action="/register" class="px-8 pb-8">
             <div class="space-y-5">
               <div>
                 <label for="reg-email" class="block text-sm text-gray-700 mb-1">E-mail</label>
-                <input id="reg-email" name="email" type="email" required
-                      class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600" />
+                <input
+                  id="reg-email"
+                  name="email"
+                  type="email"
+                  required
+                  class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600"
+                />
               </div>
               <div>
                 <label for="reg-username" class="block text-sm text-gray-700 mb-1">Username</label>
-                <input id="reg-username" name="username" type="text" minlength="3" required
-                      class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600" />
+                <input
+                  id="reg-username"
+                  name="username"
+                  type="text"
+                  minlength="3"
+                  required
+                  class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600"
+                />
               </div>
               <div>
                 <label for="reg-newpass" class="block text-sm text-gray-700 mb-1">New password</label>
-                <input id="reg-newpass" name="password" type="password" minlength="8" required
-                      class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600" />
+                <input
+                  id="reg-newpass"
+                  name="password"
+                  type="password"
+                  minlength="8"
+                  required
+                  class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600"
+                />
               </div>
               <div>
                 <label for="reg-conf" class="block text-sm text-gray-700 mb-1">Password</label>
-                <input id="reg-conf" name="passwordConfirm" type="password" minlength="8" required
-                      class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600" />
+                <input
+                  id="reg-conf"
+                  name="passwordConfirm"
+                  type="password"
+                  minlength="8"
+                  required
+                  class="w-full rounded-md border border-gray-300 bg-white p-2.5 outline-none focus:ring-2 focus:ring-purple-600"
+                />
               </div>
             </div>
             <div class="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
-              <button class="inline-flex justify-center rounded-md px-6 py-2.5 bg-purple-700 text-white hover:bg-purple-800">
+              <button
+                class="inline-flex justify-center rounded-md px-6 py-2.5 bg-purple-700 text-white hover:bg-purple-800"
+              >
                 Register
               </button>
-              <a href="#" data-modal-open="login"
-                class="inline-flex justify-center rounded-md px-6 py-2.5 border-2 border-purple-700 text-purple-700 hover:bg-purple-50">
+              <a
+                href="#"
+                data-modal-open="login"
+                class="inline-flex justify-center rounded-md px-6 py-2.5 border-2 border-purple-700 text-purple-700 hover:bg-purple-50"
+              >
                 Login
               </a>
             </div>
           </form>
         </div>
       </div>
-    <% } %>
-  </header>
+      <% } %>
+    </header>
 
-  <!-- ===== FIXED LEFT SIDEBAR (yours, with top/bottom fix) ===== -->
-  <aside class="hidden lg:block fixed left-0 w-[var(--rail-w)] border-r border-gray-200 bg-white z-40 h-full max-h-[500px]"
-         style="top: var(--header-h); bottom: 0;">
-    <div class="h-full overflow-y-auto p-4">
-      <nav class="space-y-1">
-        <a href="/" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50">Home</a>
+    <!-- ===== FIXED LEFT SIDEBAR (yours, with top/bottom fix) ===== -->
+    <aside
+      class="hidden lg:block fixed left-0 w-[var(--rail-w)] border-r border-gray-200 bg-white z-40 h-full max-h-[500px]"
+      style="top: var(--header-h); bottom: 0"
+    >
+      <div class="h-full overflow-y-auto p-4">
+        <nav class="space-y-1">
+          <a href="/" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50">Home</a>
 
-        <% if (typeof isAuthenticated !== 'undefined' && isAuthenticated) { %>
+          <% if (typeof isAuthenticated !== 'undefined' && isAuthenticated) { %>
           <a href="/" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50">New post</a>
-          <a href="/profile" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50">Profile options</a>
+          <a href="/profile" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50"
+            >Profile options</a
+          >
           <a href="/" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50">Follower options</a>
           <a href="/logout" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50">Logout</a>
-        <% } else { %>
-          <a href="#" data-modal-open="login" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50">Login</a>
-          <a href="#" data-modal-open="register" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50">Register</a>
-        <% } %>
-      </nav>
-    </div>
-  </aside>
+          <% if (_user?.is_admin) { %>
+          <div class="border-t py-2">
+            <a href="/admin" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50">Admin</a>
+          </div>
 
-  <!-- ===== FIXED RIGHT RAIL (for banners/promos; same width as sidebar) ===== -->
-  <aside class="hidden lg:block fixed right-0 w-[var(--rail-w)] z-30"
-         style="top: var(--header-h); bottom: 0;">
-    <div class="h-full overflow-y-auto p-4">
-      <div class="space-y-4">
-        <div class="rounded-xl border bg-white p-4 shadow-sm">
-          <h3 class="font-semibold mb-2">Right rail</h3>
-          <p class="text-sm text-gray-600">Use this area for banners, promos or widgets.</p>
-        </div>
-        <div class="h-48 rounded-xl border bg-white p-4 shadow-sm grid place-items-center text-gray-500 text-sm">
-          300×250 Ad
+          <% } %> <% } else { %>
+          <a
+            href="#"
+            data-modal-open="login"
+            class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50"
+            >Login</a
+          >
+          <a
+            href="#"
+            data-modal-open="register"
+            class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50"
+            >Register</a
+          >
+          <% } %>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- ===== FIXED RIGHT RAIL (for banners/promos; same width as sidebar) ===== -->
+    <aside
+      class="hidden lg:block fixed right-0 w-[var(--rail-w)] z-30"
+      style="top: var(--header-h); bottom: 0"
+    >
+      <div class="h-full overflow-y-auto p-4">
+        <div class="space-y-4">
+          <div class="rounded-xl border bg-white p-4 shadow-sm">
+            <h3 class="font-semibold mb-2">Right rail</h3>
+            <p class="text-sm text-gray-600">Use this area for banners, promos or widgets.</p>
+          </div>
+          <div
+            class="h-48 rounded-xl border bg-white p-4 shadow-sm grid place-items-center text-gray-500 text-sm"
+          >
+            300×250 Ad
+          </div>
         </div>
       </div>
-    </div>
-  </aside>
+    </aside>
 
-  <!-- ===== MAIN CONTENT ===== -->
-  <main class="flex-1">
-    <div class="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-6
-                lg:pl-[var(--rail-w)] lg:pr-[var(--rail-w)]">
-      <div class="rounded-2xl border bg-white p-6 shadow-sm">
-        <%- body %>
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="flex-1">
+      <div
+        class="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-6 lg:pl-[var(--rail-w)] lg:pr-[var(--rail-w)]"
+      >
+        <div class="rounded-2xl border bg-white p-6 shadow-sm"><%- body %></div>
       </div>
-    </div>
-  </main>
+    </main>
 
-  <!-- ===== FOOTER ===== -->
-  <footer class="mt-auto border-t bg-white">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-sm text-neutral-600">
-      © <%= new Date().getFullYear() %> InkFlow. All rights reserved.
-    </div>
-  </footer>
+    <!-- ===== FOOTER ===== -->
+    <footer class="mt-auto border-t bg-white">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-sm text-neutral-600">
+        © <%= new Date().getFullYear() %> InkFlow. All rights reserved.
+      </div>
+    </footer>
 
-  <!-- ===== Size-aware scripts ===== -->
-  <script>
-    function setHeaderH() {
-      const h = document.getElementById('site-header')?.offsetHeight || 64;
-      document.documentElement.style.setProperty('--header-h', h + 'px');
-    }
-    window.addEventListener('load', setHeaderH);
-    window.addEventListener('resize', setHeaderH);
-    new MutationObserver(setHeaderH).observe(document.getElementById('site-header'), {
-      childList: true, subtree: true, attributes: true
-    });
-  </script>
-
-  <script>
-    (function () {
-      const fabBtn = document.getElementById('fabBtn');
-      const fabMenu = document.getElementById('fabMenu');
-      const fabBackdrop = document.getElementById('fabBackdrop');
-      function openFab() {
-        if (!fabBtn || !fabMenu || !fabBackdrop) return;
-        fabMenu.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
-        fabBackdrop.classList.remove('hidden');
-        fabBtn.setAttribute('aria-expanded', 'true');
+    <!-- ===== Size-aware scripts ===== -->
+    <script>
+      function setHeaderH() {
+        const h = document.getElementById("site-header")?.offsetHeight || 64;
+        document.documentElement.style.setProperty("--header-h", h + "px");
       }
-      function closeFab() {
-        if (!fabBtn || !fabMenu || !fabBackdrop) return;
-        fabMenu.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
-        fabBackdrop.classList.add('hidden');
-        fabBtn.setAttribute('aria-expanded', 'false');
-      }
-      function toggleFab() {
-        const isOpen = fabBtn && fabBtn.getAttribute('aria-expanded') === 'true';
-        if (isOpen) closeFab(); else openFab();
-      }
-      if (fabBtn) fabBtn.addEventListener('click', (e) => { e.preventDefault(); toggleFab(); });
-      if (fabBackdrop) fabBackdrop.addEventListener('click', closeFab);
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeFab(); });
-      if (fabMenu) {
-        fabMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeFab));
-      }
-      const mq = window.matchMedia('(min-width: 640px)');
-      if (mq && mq.addEventListener) mq.addEventListener('change', e => { if (e.matches) closeFab(); });
-
-      // Modals
-      const overlay = document.getElementById('modalOverlay');
-      const loginModal = document.getElementById('modal-login');
-      const registerModal = document.getElementById('modal-register');
-      function openModal(modalEl) {
-        if (!overlay || !modalEl) return;
-        closeFab();
-        overlay.classList.remove('hidden');
-        modalEl.classList.remove('hidden');
-        modalEl.classList.add('flex');
-        document.documentElement.classList.add('overflow-hidden');
-        const firstInput = modalEl.querySelector('input');
-        if (firstInput) setTimeout(() => firstInput.focus(), 0);
-      }
-      function closeAllModals() {
-        if (!overlay) return;
-        overlay.classList.add('hidden');
-        [loginModal, registerModal].forEach(m => { if (m) { m.classList.add('hidden'); m.classList.remove('flex'); } });
-        document.documentElement.classList.remove('overflow-hidden');
-      }
-      function switchTo(name) {
-        closeAllModals();
-        if (name === 'login') openModal(loginModal);
-        if (name === 'register') openModal(registerModal);
-      }
-      document.querySelectorAll('[data-modal-open]').forEach(el => {
-        el.addEventListener('click', e => {
-          e.preventDefault();
-          const name = el.getAttribute('data-modal-open');
-          switchTo(name);
-        });
+      window.addEventListener("load", setHeaderH);
+      window.addEventListener("resize", setHeaderH);
+      new MutationObserver(setHeaderH).observe(document.getElementById("site-header"), {
+        childList: true,
+        subtree: true,
+        attributes: true,
       });
-      document.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', e => { e.preventDefault(); closeAllModals(); }));
-      if (overlay) overlay.addEventListener('click', closeAllModals);
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllModals(); });
-    })();
-  </script>
-</body>
+    </script>
+
+    <script>
+      (function () {
+        const fabBtn = document.getElementById("fabBtn");
+        const fabMenu = document.getElementById("fabMenu");
+        const fabBackdrop = document.getElementById("fabBackdrop");
+        function openFab() {
+          if (!fabBtn || !fabMenu || !fabBackdrop) return;
+          fabMenu.classList.remove("opacity-0", "scale-95", "pointer-events-none");
+          fabBackdrop.classList.remove("hidden");
+          fabBtn.setAttribute("aria-expanded", "true");
+        }
+        function closeFab() {
+          if (!fabBtn || !fabMenu || !fabBackdrop) return;
+          fabMenu.classList.add("opacity-0", "scale-95", "pointer-events-none");
+          fabBackdrop.classList.add("hidden");
+          fabBtn.setAttribute("aria-expanded", "false");
+        }
+        function toggleFab() {
+          const isOpen = fabBtn && fabBtn.getAttribute("aria-expanded") === "true";
+          if (isOpen) closeFab();
+          else openFab();
+        }
+        if (fabBtn)
+          fabBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            toggleFab();
+          });
+        if (fabBackdrop) fabBackdrop.addEventListener("click", closeFab);
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") closeFab();
+        });
+        if (fabMenu) {
+          fabMenu.querySelectorAll("a").forEach((a) => a.addEventListener("click", closeFab));
+        }
+        const mq = window.matchMedia("(min-width: 640px)");
+        if (mq && mq.addEventListener)
+          mq.addEventListener("change", (e) => {
+            if (e.matches) closeFab();
+          });
+
+        // Modals
+        const overlay = document.getElementById("modalOverlay");
+        const loginModal = document.getElementById("modal-login");
+        const registerModal = document.getElementById("modal-register");
+        function openModal(modalEl) {
+          if (!overlay || !modalEl) return;
+          closeFab();
+          overlay.classList.remove("hidden");
+          modalEl.classList.remove("hidden");
+          modalEl.classList.add("flex");
+          document.documentElement.classList.add("overflow-hidden");
+          const firstInput = modalEl.querySelector("input");
+          if (firstInput) setTimeout(() => firstInput.focus(), 0);
+        }
+        function closeAllModals() {
+          if (!overlay) return;
+          overlay.classList.add("hidden");
+          [loginModal, registerModal].forEach((m) => {
+            if (m) {
+              m.classList.add("hidden");
+              m.classList.remove("flex");
+            }
+          });
+          document.documentElement.classList.remove("overflow-hidden");
+        }
+        function switchTo(name) {
+          closeAllModals();
+          if (name === "login") openModal(loginModal);
+          if (name === "register") openModal(registerModal);
+        }
+        document.querySelectorAll("[data-modal-open]").forEach((el) => {
+          el.addEventListener("click", (e) => {
+            e.preventDefault();
+            const name = el.getAttribute("data-modal-open");
+            switchTo(name);
+          });
+        });
+        document.querySelectorAll("[data-modal-close]").forEach((el) =>
+          el.addEventListener("click", (e) => {
+            e.preventDefault();
+            closeAllModals();
+          })
+        );
+        if (overlay) overlay.addEventListener("click", closeAllModals);
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") closeAllModals();
+        });
+      })();
+    </script>
+  </body>
 </html>
