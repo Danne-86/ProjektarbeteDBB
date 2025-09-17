@@ -4,18 +4,8 @@ const router = express.Router();
 const db = require("../db");
 
 router.use((req, res, next) => {
-  // const { user } = req.session ? req.session : {};  // TODO: Uncomment when session is implemented
-
-  // TODO: Remove placeholder for demonstration
-  const user = {
-    username: "lorem ipsum",
-    is_admin: true,
-  };
-  req.user = user;
-  // End of placeholder
-
-  if (!user.is_admin) {
-    return res.status(403).send("Access denied");
+  if (!req.session.user || !req.session.user.is_admin) {
+    return res.status(403).send("Forbidden: Admins only");
   }
   next();
 });
