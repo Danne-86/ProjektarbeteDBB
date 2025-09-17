@@ -10,6 +10,7 @@ const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const authRouter = require("./routes/auth");
 const adminRouter = require("./routes/admin");
+const postsRouter = require("./routes/posts");
 
 const app = express();
 
@@ -26,8 +27,8 @@ app.use(cookieParser());
 app.use(expressLayouts);
 app.set("layout", "layouts/base");
 
-const blogpageRoutes = require('./routes/index');
-app.use('/', blogpageRoutes);
+const blogpageRoutes = require("./routes/index");
+app.use("/", blogpageRoutes);
 
 // Sessions
 app.use(
@@ -58,6 +59,7 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/", authRouter);
 app.use("/admin", adminRouter);
+app.use("/posts", postsRouter);
 
 // 404
 app.use(function (req, res, next) {
