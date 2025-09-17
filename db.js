@@ -17,7 +17,7 @@ db.exec(`
     is_admin BOOLEAN DEFAULT FALSE,
     password_hash TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME
   )
     `);
 db.exec(`
@@ -28,7 +28,7 @@ db.exec(`
     content TEXT NOT NULL,
     is_flagged BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME,
     FOREIGN KEY(user_id) REFERENCES users(id)
   )
         `);
@@ -39,7 +39,7 @@ db.exec(`
     post_id INTEGER NOT NULL,
     is_flagged BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME,
     FOREIGN KEY(user_id) REFERENCES users(id),
     FOREIGN KEY(post_id) REFERENCES posts(id)
   )
