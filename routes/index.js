@@ -1,11 +1,11 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
 var path = require('path');
 
 const { uploadPostImage } = require("../middleware/upload");
-const e = require('express');
 const { error } = require('console');
 const { authenticateToken } = require("../middleware/auth");
+
 
 // GET blog page
 router.get('/blog', (req, res) => {
@@ -19,7 +19,7 @@ router.get('/blog', (req, res) => {
 
 
 // POST handle blog creation with image upload
-router.post('/blog/create', AuthenticateToken, (req, res) => {
+router.post('/blog/create', authenticateToken, (req, res) => {
   uploadPostImage(req, res, (err) => {
     if (err) {
       if (err instanceof multer.MulterError) {
