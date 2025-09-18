@@ -22,83 +22,70 @@ router.post("/register", (req, res) => {
   const errors = [];
   const values = { username, email };
 
-  if (!username || username.length < 3)
-    errors.push("Username must be at least 3 characters.");
+  if (!username || username.length < 3) errors.push("Username must be at least 3 characters.");
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
-  if (!email || !emailRegex.test(email))
-    errors.push("Please enter a valid email address.");
-  if (!password || password.length < 8)
-    errors.push("Password must be at least 8 characters.");
+  if (!email || !emailRegex.test(email)) errors.push("Please enter a valid email address.");
+  if (!password || password.length < 8) errors.push("Password must be at least 8 characters.");
   if (password !== passwordConfirm) errors.push("Passwords do not match.");
 
   if (errors.length) {
-    return res
-      .status(400)
-      .render("register", { title: "Register", errors, values });
+    return res.status(400).render("register", { title: "Register", errors, values });
   }
 
-  db.get(
-    "SELECT id FROM users WHERE username = ? COLLATE NOCASE",
-    [username],
-    (e1, r1) => {
-      if (e1) {
-        console.error(e1);
+  db.get("SELECT id FROM users WHERE username = ? COLLATE NOCASE", [username], (e1, r1) => {
+    if (e1) {
+      console.error(e1);
+      return res.status(500).render("register", {
+        title: "Register",
+        errors: ["Server error. Try again."],
+        values,
+      });
+    }
+    if (r1) {
+      return res.status(400).render("register", {
+        title: "Register",
+        errors: ["Username already taken."],
+        values,
+      });
+    }
+
+    db.get("SELECT id FROM users WHERE email = ? COLLATE NOCASE", [email], (e2, r2) => {
+      if (e2) {
+        console.error(e2);
         return res.status(500).render("register", {
           title: "Register",
           errors: ["Server error. Try again."],
           values,
         });
       }
-      if (r1) {
+      if (r2) {
         return res.status(400).render("register", {
           title: "Register",
-          errors: ["Username already taken."],
+          errors: ["Email already in use."],
           values,
         });
       }
 
-      db.get(
-        "SELECT id FROM users WHERE email = ? COLLATE NOCASE",
-        [email],
-        (e2, r2) => {
-          if (e2) {
-            console.error(e2);
+      const hash = bcrypt.hashSync(password, 10);
+      db.run(
+        "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
+        [username, email, hash],
+        function (e3) {
+          if (e3) {
+            console.error(e3);
             return res.status(500).render("register", {
               title: "Register",
               errors: ["Server error. Try again."],
               values,
             });
           }
-          if (r2) {
-            return res.status(400).render("register", {
-              title: "Register",
-              errors: ["Email already in use."],
-              values,
-            });
-          }
-
-          const hash = bcrypt.hashSync(password, 10);
-          db.run(
-            "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
-            [username, email, hash],
-            function (e3) {
-              if (e3) {
-                console.error(e3);
-                return res.status(500).render("register", {
-                  title: "Register",
-                  errors: ["Server error. Try again."],
-                  values,
-                });
-              }
-              // Auto-login
-              req.session.user = { id: this.lastID, username, email };
-              return res.redirect("/");
-            }
-          );
+          // Auto-login
+          req.session.user = { id: this.lastID, username, email };
+          return res.redirect("/");
         }
       );
-    }
-  );
+    });
+  });
 });
 
 router.get("/login", (req, res) => {
@@ -118,45 +105,42 @@ router.post("/login", (req, res) => {
     return res.status(400).render("login", { title: "Login", errors, values });
   }
 
-  db.get(
-    "SELECT * FROM users WHERE email = ? COLLATE NOCASE",
-    [email],
-    (err, user) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).render("login", {
-          title: "Login",
-          errors: ["Server error. Try again."],
-          values,
-        });
-      }
-      if (!user) {
-        return res.status(400).render("login", {
-          title: "Login",
-          errors: ["Invalid credentials."],
-          values,
-        });
-      }
-
-      const ok = bcrypt.compareSync(password, user.password_hash);
-      if (!ok) {
-        return res.status(400).render("login", {
-          title: "Login",
-          errors: ["Invalid credentials."],
-          values,
-        });
-      }
-
-      req.session.user = {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        avatar_url:
-          user.avatar_url || "/avatars/SpongeBob_SquarePants_character.png",
-      };
-      res.redirect("/");
+  db.get("SELECT * FROM users WHERE email = ? COLLATE NOCASE", [email], (err, user) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).render("login", {
+        title: "Login",
+        errors: ["Server error. Try again."],
+        values,
+      });
     }
-  );
+    if (!user) {
+      return res.status(400).render("login", {
+        title: "Login",
+        errors: ["Invalid credentials."],
+        values,
+      });
+    }
+
+    const ok = bcrypt.compareSync(password, user.password_hash);
+    if (!ok) {
+      return res.status(400).render("login", {
+        title: "Login",
+        errors: ["Invalid credentials."],
+        values,
+      });
+    }
+
+    req.session.user = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      is_admin: user.is_admin,
+      avatar_url: user.avatar_url || "/avatars/SpongeBob_SquarePants_character.png",
+    };
+
+    res.redirect("/");
+  });
 });
 
 module.exports = router;

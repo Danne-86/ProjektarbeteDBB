@@ -4,18 +4,8 @@ const router = express.Router();
 const db = require("../db");
 
 router.use((req, res, next) => {
-  // const { user } = req.session ? req.session : {};  // TODO: Uncomment when session is implemented
-
-  // TODO: Remove placeholder for demonstration
-  const user = {
-    username: "lorem ipsum",
-    is_admin: true,
-  };
-  req.user = user;
-  // End of placeholder
-
-  if (!user.is_admin) {
-    return res.status(403).send("Access denied");
+  if (!req.session.user || !req.session.user.is_admin) {
+    return res.status(403).send("Forbidden: Admins only");
   }
   next();
 });
@@ -43,27 +33,31 @@ router.get("/", (req, res, next) => {
 
   const { user } = req;
   const showFlagged = req.query.flagged !== "false";
-  res.render("admin", { title: "Admin Dashboard", user, posts, comments, showFlagged });
+  res.render("admin", { title: "Admin Dashboard", _user: user, posts, comments, showFlagged });
 });
 
 router.post("/posts/delete", (req, res, next) => {
-  //TODO: Backend logic for delete post route
-  res.send(`delete post route id: ${req.body.id}`);
+  const { id, showFlagged } = req.body;
+  db.prepare(`DELETE FROM posts WHERE id = ?`).run(id);
+  res.redirect(`/admin?flagged=${showFlagged}`);
 });
 
 router.post("/posts/unflag", (req, res, next) => {
-  //TODO: Backend logic for unflag post route
-  res.send(`unflag post route id: ${req.body.id}`);
+  const { id, showFlagged } = req.body;
+  db.prepare(`UPDATE posts SET is_flagged = 0 WHERE id = ?`).run(id);
+  res.redirect(`/admin?flagged=${showFlagged}`);
 });
 
 router.post("/comments/delete", (req, res, next) => {
-  //TODO: Backend logic for delete comment route
-  res.send(`delete comment route id: ${req.body.id}`);
+  const { id, showFlagged } = req.body;
+  db.prepare(`DELETE FROM comments WHERE id = ?`).run(id);
+  res.redirect(`/admin?flagged=${showFlagged}`);
 });
 
 router.post("/comments/unflag", (req, res, next) => {
-  //TODO: Backend logic for unflag comment route
-  res.send(`unflag  comment route id: ${req.body.id}`);
+  const { id, showFlagged } = req.body;
+  db.prepare(`UPDATE comments SET is_flagged = 0 WHERE id = ?`).run(id);
+  res.redirect(`/admin?flagged=${showFlagged}`);
 });
 
 module.exports = router;
