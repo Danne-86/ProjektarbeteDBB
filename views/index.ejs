@@ -33,9 +33,9 @@
   <main class="mx-auto max-w-7xl p-6">
     <div class="grid grid-cols-7 gap-4">
       <div class="col-start-1 col-end-8 text-center">
-        <h2 class="text-5xl italic mb-7">Where thoughts find their rhythm and words find their home</h2>
+        <h2 class="text-5xl italic mb-7">Placeholder subheader</h2>
         <h1 class="text-7xl font-bold mb-7">
-          <%= title %>
+          Placeholder header
         </h1>
       </div>
       <div class="col-start-1 col-end-4">
@@ -56,20 +56,27 @@
           <li>✘ No data misuse - your privacy is respected.</li>
         </ul>
       </div>
-      <div class="col-span-2 col-start-4 col-end-8">
-        <a href="#" data-modal-open="login"
-          class="inline-flex items-center justify-center rounded-md px-5 py-2.5 bg-purple-700 text-white hover:bg-purple-800 shadow-sm">
-          Login
-        </a>
-        <a href="#" data-modal-open="register"
-          class="inline-flex items-center justify-center rounded-md px-5 py-2 border-2 border-purple-700 text-purple-700 hover:bg-purple-50">
-          Register
-        </a>
+      <div class="col-span-8">
+        <% if (typeof isAuthenticated !=='undefined' && isAuthenticated) { %>
+          <h3 class="italic text-xl text-center">Check out some of the popular posts</h3>
+          <% } else { %>
+            <div class="flex justify-center gap-1">
+              <a href="#" data-modal-open="login"
+                class="inline-flex items-center justify-center rounded-md px-5 py-2.5 bg-purple-700 text-white hover:bg-purple-800 shadow-sm">
+                Login
+              </a>
+              <a href="#" data-modal-open="register"
+                class="inline-flex items-center justify-center rounded-md px-5 py-2 border-2 border-purple-700 text-purple-700 hover:bg-purple-50">
+                Register
+              </a>
+            </div>
+            <% } %>
       </div>
     </div>
     <section>
-      <div class="carousel-container">
-        <button class="carousel-button prev">&lt;</button>
+      <div class="flex items-center justify-center gap-2">
+      <button class="carousel-button prev">&lt;</button>
+      <div class="carousel-container">       
         <div class="carousel-track mt-5 text-wrap overflow-hidden">
           <% const now=new Date(); const visiblePosts=posts.sort(()=> 0.5 - Math.random()).slice(0, 5);
 
@@ -77,8 +84,9 @@
             %>
             <%- include('partials/carouselCard', { post }) %>
               <% }) %>
-        </div>
-        <button class="carousel-button next">&gt;</button>
+        </div>       
+      </div>
+      <button class="carousel-button next">&gt;</button>
       </div>
     </section>
   </main>
