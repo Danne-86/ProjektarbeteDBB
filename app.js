@@ -26,9 +26,6 @@ app.use(cookieParser());
 app.use(expressLayouts);
 app.set("layout", "layouts/base");
 
-const blogpageRoutes = require('./routes/index');
-app.use('/', blogpageRoutes);
-
 // Sessions
 app.use(
   session({
