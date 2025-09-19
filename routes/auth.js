@@ -1,18 +1,29 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const db = require("../db");
+const { issueAuthCookie } = require("../utils/authToken");
 
 const router = express.Router();
 
+// Logout: clear JWT + session cookie
 router.get("/logout", (req, res) => {
-  if (req.session) req.session.destroy(() => res.redirect("/"));
-  else res.redirect("/");
+  res.clearCookie("auth_token");
+  if (req.session) {
+    req.session.destroy(() => {
+      res.clearCookie("sid"); // session cookie name from app.js
+      res.redirect("/");
+    });
+  } else {
+    res.redirect("/");
+  }
 });
 
+// Register (form)
 router.get("/register", (req, res) => {
   res.render("register", { title: "Register", errors: [], values: {} });
 });
 
+// Register (submit)
 router.post("/register", (req, res) => {
   let { username, email, password, passwordConfirm } = req.body;
 
@@ -90,8 +101,22 @@ router.post("/register", (req, res) => {
                   values,
                 });
               }
-              // Auto-login
-              req.session.user = { id: this.lastID, username, email };
+
+              // Build user payload for session/JWT
+              const payload = {
+                id: this.lastID,
+                username,
+                email,
+                is_admin: 0,
+                avatar_url: "/avatars/SpongeBob_SquarePants_character.png",
+              };
+
+              // Mint JWT cookie for routes protected by JWT middleware
+              issueAuthCookie(res, payload);
+
+              // Keep session for server-rendered EJS
+              req.session.user = payload;
+
               return res.redirect("/");
             }
           );
@@ -101,13 +126,14 @@ router.post("/register", (req, res) => {
   );
 });
 
+// Login (form)
 router.get("/login", (req, res) => {
   res.render("login", { title: "Login", errors: [], values: {} });
 });
 
+// Login (submit)
 router.post("/login", (req, res) => {
   let { email, password } = req.body;
-
   email = (email || "").trim().toLowerCase();
 
   const errors = [];
@@ -147,14 +173,22 @@ router.post("/login", (req, res) => {
         });
       }
 
-      req.session.user = {
+      const payload = {
         id: user.id,
         username: user.username,
         email: user.email,
+        is_admin: user.is_admin,
         avatar_url:
           user.avatar_url || "/avatars/SpongeBob_SquarePants_character.png",
       };
-      res.redirect("/");
+
+      // JWT for protected routes
+      issueAuthCookie(res, payload);
+
+      // Session for EJS
+      req.session.user = payload;
+
+      return res.redirect("/");
     }
   );
 });
