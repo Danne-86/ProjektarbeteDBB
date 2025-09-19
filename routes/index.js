@@ -19,6 +19,7 @@ router.get('/', function (req, res, next) {
     title: 'Inkflow',
     posts
   });
+});
 
 // GET blog page
 router.get("/blog", (req, res) => {
