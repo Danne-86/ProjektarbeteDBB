@@ -1,64 +1,54 @@
-const db = require("../db");
-
-exports.uploadAvatar = (req, res) => {
-  require("../middleware/upload").uploadAvatar(req, res, (err) => {
-    if (err) {
-      return res.status(400).json({ error: err.message || err });
-    }
-
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
-
-    const avatarPath = "/avatars/" + req.file.filename;
-
-    const query = `UPDATE users SET avatar = ? WHERE id = ?`;
-    db.run(query, [avatarPath, req.user.id], function (err) {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Error updating avatar" });
-      }
-
-      res.status(200).json({
-        message: "Avatar updated successfully",
-        avatar: avatarPath,
+exports.createPost = (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).render("login", {
+        title: "Login",
+        errorMessage: "You must be logged in to create posts."
       });
+    }
+
+    let { title, content } = req.body;
+    title = (title || "").trim();
+    content = (content || "").trim();
+
+    const errors = [];
+    if (!title) errors.push("Title is required.");
+    if (!content) errors.push("Content is required.");
+    if (title.length > 120) errors.push("Title must be ≤ 120 characters.");
+    if (content.length > 20000) errors.push("Content must be ≤ 20,000 characters.");
+
+    let heroPath = null;
+    if (req.file) {
+      heroPath = "/posts/" + req.file.filename;
+    }
+
+    if (errors.length) {
+      return res.render("blogpage", {
+        title: "Create Blog Post",
+        user: req.user,
+        isAuthenticated: true,
+        errorMessage: errors.join(" ")
+      });
+    }
+
+    db.run(
+      `INSERT INTO posts (user_id, header, content, hero_image) VALUES (?, ?, ?, ?)`,
+      [req.user.id, title, content, heroPath]
+    );
+
+    return res.render("blogpage", {
+      title: "Create Blog Post",
+      user: req.user,
+      isAuthenticated: true,
+      successMessage: "Post created successfully!"
     });
-  });
-};
-
-exports.postComment = (req, res) => {
-  const { postId, comment } = req.body;
-
-  if (!comment || !postId) {
-    return res.status(400).json({ error: "Missing post ID or comment" });
+  } catch (err) {
+    console.error(err);
+    return res.render("blogpage", {
+      title: "Create Blog Post",
+      user: req.user,
+      isAuthenticated: true,
+      errorMessage: "Error creating post."
+    });
   }
-
-  const query = `INSERT INTO comments (user_id, post_id, comment) VALUES (?, ?, ?)`;
-  db.run(query, [req.user.id, postId, comment], function (err) {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: "Failed to post comment" });
-    }
-
-    res.status(201).json({ message: "Comment posted successfully" });
-  });
-};
-
-exports.postLike = (req, res) => {
-  const { postId } = req.body;
-
-  if (!postId) {
-    return res.status(400).json({ error: "Missing post ID" });
-  }
-
-  const query = `INSERT INTO likes (user_id, post_id) VALUES (?, ?)`;
-  db.run(query, [req.user.id, postId], function (err) {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: "Failed to like post" });
-    }
-
-    res.status(201).json({ message: "Post liked successfully" });
-  });
 };

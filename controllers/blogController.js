@@ -1,81 +1,82 @@
 const db = require("../db");
 
-// GET /feed – public blog feed
-exports.getFeed = (req, res) => {
-  const posts = db.all(
-    `
-    SELECT p.id, p.header, p.content, p.created_at, u.username
+function getFeed(req, res) {
+  const posts = db.all(`
+    SELECT p.id, p.header, p.content, p.created_at, p.hero_image, u.username
     FROM posts p
     JOIN users u ON u.id = p.user_id
     ORDER BY p.created_at DESC
-    `
-  );
+  `);
 
-  const mapped = posts.map((p) => ({
+  const mapped = posts.map(p => ({
     ...p,
     excerpt: (p.content || "").slice(0, 220) + ((p.content || "").length > 220 ? "…" : "")
   }));
 
-  res.render("feed", {
-    title: "Blog feed",
-    posts: mapped
-  });
-};
+  res.render("feed", { title: "Blog feed", posts: mapped });
+}
 
-// GET /posts/:id – public single post
-exports.getPostById = (req, res) => {
+function getPostById(req, res) {
   const { id } = req.params;
-  const post = db.get(
-    `
-    SELECT p.id, p.header, p.content, p.created_at, u.username
+  const post = db.get(`
+    SELECT p.id, p.header, p.content, p.created_at, p.hero_image, u.username
     FROM posts p
     JOIN users u ON u.id = p.user_id
     WHERE p.id = ?
-    `,
-    [id]
-  );
+  `, [id]);
 
-  if (!post) {
-    return res.status(404).render("error", { message: "Post not found" });
-  }
+  if (!post) return res.status(404).render("error", { message: "Post not found" });
 
-  res.render("post", {
-    title: post.header,
-    post
-  });
-};
+  res.render("post", { title: post.header, post });
+}
 
-// POST /blog/create – create new blog post (authenticated)
-exports.createPost = (req, res) => {
+function createPost(req, res) {
   try {
     if (!req.user || !req.user.id) {
       return res.status(401).render("login", {
         title: "Login",
-        errorMessage: "You must be logged in to create posts."
+        errors: ["Please log in to continue."],
+        errorMessage: null,
+        values: {}
       });
     }
 
-    const { title, content } = req.body;
+    let { title, content } = req.body;
+    title = (title || "").trim();
+    content = (content || "").trim();
 
-    if (!title || !content) {
+    const errors = [];
+    if (!title) errors.push("Title is required.");
+    if (!content) errors.push("Content is required.");
+    if (title.length > 120) errors.push("Title must be ≤ 120 characters.");
+    if (content.length > 20000) errors.push("Content must be ≤ 20,000 characters.");
+
+    let heroPath = null;
+    if (req.file) {
+      heroPath = "/posts/" + req.file.filename;
+    }
+
+    if (errors.length) {
       return res.render("blogpage", {
         title: "Create Blog Post",
         user: req.user,
         isAuthenticated: true,
-        errorMessage: "Title and content are required."
+        errorMessage: errors.join(" "),
+        successMessage: null
       });
     }
 
     db.run(
-      `INSERT INTO posts (user_id, header, content) VALUES (?, ?, ?)`,
-      [req.user.id, title, content]
+      `INSERT INTO posts (user_id, header, content, hero_image) VALUES (?, ?, ?, ?)`,
+      [req.user.id, title, content, heroPath]
     );
 
     return res.render("blogpage", {
       title: "Create Blog Post",
       user: req.user,
       isAuthenticated: true,
-      successMessage: "Post created successfully!"
+      successMessage: "Post created successfully!",
+      errorMessage: null
     });
   } catch (err) {
     console.error(err);
@@ -83,7 +84,10 @@ exports.createPost = (req, res) => {
       title: "Create Blog Post",
       user: req.user,
       isAuthenticated: true,
-      errorMessage: "Error creating post."
+      errorMessage: "Error creating post.",
+      successMessage: null
     });
   }
-};
+}
+
+module.exports = { getFeed, getPostById, createPost };

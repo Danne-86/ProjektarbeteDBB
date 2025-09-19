@@ -1,18 +1,21 @@
 // middleware/auth.js
 exports.authenticateToken = (req, res, next) => {
-  // Session-baserad auth (ingen JWT)
+  // Session-baserad auth
   const user = req.session && req.session.user;
   if (user) {
-    req.user = user; // gör användaren tillgänglig för controllers
+    req.user = user;
     return next();
   }
-
+  // Rendera login on html request
   if (req.accepts('html')) {
     return res.status(401).render('login', {
       title: 'Login',
-      errorMessage: 'Please log in to continue.'
+      errors: ['Please log in to continue.'],
+      errorMessage: null,
+      values: {}
     });
   }
+  // Fallback for API
   return res.status(401).json({ error: 'Not authenticated' });
 };
 

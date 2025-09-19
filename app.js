@@ -47,6 +47,13 @@ app.use((req, res, next) => {
   res.locals.isAuthenticated = !!(req.session && req.session.user);
   res.locals.user = req.session ? req.session.user : null;
   if (res.locals.user && !req.user) req.user = res.locals.user;
+
+  // EJS wont crash if these are undefined
+  if (typeof res.locals.successMessage === "undefined") res.locals.successMessage = null;
+  if (typeof res.locals.errorMessage === "undefined") res.locals.errorMessage = null;
+  if (typeof res.locals.errors === "undefined") res.locals.errors = null;
+  if (typeof res.locals.values === "undefined") res.locals.values = {};
+
   next();
 });
 
