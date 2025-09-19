@@ -10,6 +10,7 @@ const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const authRouter = require("./routes/auth");
 const adminRouter = require("./routes/admin");
+const blogRouter = require("./routes/blog");
 
 const app = express();
 
@@ -25,9 +26,6 @@ app.use(cookieParser());
 // layouts
 app.use(expressLayouts);
 app.set("layout", "layouts/base");
-
-const blogpageRoutes = require('./routes/index');
-app.use('/', blogpageRoutes);
 
 // Sessions
 app.use(
@@ -48,12 +46,14 @@ app.use(
 app.use((req, res, next) => {
   res.locals.isAuthenticated = !!(req.session && req.session.user);
   res.locals.user = req.session ? req.session.user : null;
+  if (res.locals.user && !req.user) req.user = res.locals.user;
   next();
 });
 
 app.use(express.static(path.join(__dirname, "public")));
 
 // Routers
+app.use("/", blogRouter); 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/", authRouter);

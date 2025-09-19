@@ -1,31 +1,31 @@
 // middleware/auth.js
-const jwt = require("jsonwebtoken");
+exports.authenticateToken = (req, res, next) => {
+  // Session-baserad auth (ingen JWT)
+  const user = req.session && req.session.user;
+  if (user) {
+    req.user = user; // gör användaren tillgänglig för controllers
+    return next();
+  }
 
-function authenticateToken(req, res, next) {
-  const token = req.cookies.auth_token;
-  if (!token) return res.status(401).send("Access denied");
+  if (req.accepts('html')) {
+    return res.status(401).render('login', {
+      title: 'Login',
+      errorMessage: 'Please log in to continue.'
+    });
+  }
+  return res.status(401).json({ error: 'Not authenticated' });
+};
 
-  jwt.verify(token, "your_jwt_secret", (err, user) => {
-    if (err) return res.status(403).send("Invalid token");
+exports.ensureLoggedIn = exports.authenticateToken;
+
+exports.ensureAdmin = (req, res, next) => {
+  const user = req.session && req.session.user;
+  if (user && user.is_admin) {
     req.user = user;
-    next();
-  });
-}
-
-function authenticateAdmin(req, res, next) {
-  const token = req.cookies.auth_token;
-  if (!token) return res.status(401).send("Access denied");
-
-  jwt.verify(token, "your_jwt_secret", (err, user) => {
-    if (err) return res.status(403).send("Invalid token");
-    if (!user.is_admin) {
-      return res
-        .status(403)
-        .send("You are not authorized to perform this action");
-    }
-    req.user = user;
-    next();
-  });
-}
-
-module.exports = { authenticateToken, authenticateAdmin };
+    return next();
+  }
+  if (req.accepts('html')) {
+    return res.status(403).render('error', { message: 'Forbidden' });
+  }
+  return res.status(403).json({ error: 'Forbidden' });
+};

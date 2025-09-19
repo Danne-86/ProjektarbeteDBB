@@ -12,6 +12,10 @@ router.get("/", (req, res) => {
   });
 });
 
+router.get("/", (req, res) => {
+  return res.redirect("/feed");
+});
+
 // GET blog page
 router.get("/blog", (req, res) => {
   res.render("blogpage", {
@@ -99,5 +103,7 @@ router.use((error, req, res, next) => {
   }
   next();
 });
+
+
 
 module.exports = router;
