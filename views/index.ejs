@@ -75,18 +75,18 @@
     </div>
     <section>
       <div class="flex items-center justify-center gap-2">
-      <button class="carousel-button prev">&lt;</button>
-      <div class="carousel-container">       
-        <div class="carousel-track mt-5 text-wrap overflow-hidden">
-          <% const now=new Date(); const visiblePosts=posts.sort(()=> 0.5 - Math.random()).slice(0, 5);
+        <button class="carousel-button prev">&lt;</button>
+        <div class="carousel-container">
+          <div class="carousel-track mt-5 text-wrap overflow-hidden">
+            <% const now=new Date(); const visiblePosts=posts.sort(()=> 0.5 - Math.random()).slice(0, 5);
 
-            visiblePosts.forEach(post => {
-            %>
-            <%- include('partials/carouselCard', { post }) %>
-              <% }) %>
-        </div>       
-      </div>
-      <button class="carousel-button next">&gt;</button>
+              visiblePosts.forEach(post => {
+              %>
+              <%- include('partials/carouselCard', { post }) %>
+                <% }) %>
+          </div>
+        </div>
+        <button class="carousel-button next">&gt;</button>
       </div>
     </section>
   </main>

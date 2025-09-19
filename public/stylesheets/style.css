@@ -1,10 +1,10 @@
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+    padding: 50px;
+    font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 a {
-  color: #00B7FF;
+    color: #00B7FF;
 }
 
 .carousel {
@@ -27,11 +27,12 @@ a {
     overflow-x: auto;
     scroll-behavior: smooth;
     scroll-snap-type: x mandatory;
-    scrollbar-width: none; 
+    scrollbar-width: none;
 }
 
 .carousel-track::-webkit-scrollbar {
-    display: none; /* Döljer scrollbar för Webkit-baserade browsers !!läs safari!! */
+    display: none;
+    /* Döljer scrollbar för Webkit-baserade browsers !!läs safari!! */
 }
 
 .carousel-button {
