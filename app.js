@@ -7,12 +7,14 @@ const logger = require("morgan");
 const session = require("express-session");
 const expressLayouts = require("express-ejs-layouts");
 const jwt = require("jsonwebtoken");
+const { SECRET } = require("./utils/authToken");
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const authRouter = require("./routes/auth");
 const adminRouter = require("./routes/admin");
 const blogRouter = require("./routes/blog");
+const profileRouter = require("./routes/profile");
 
 const app = express();
 
@@ -53,8 +55,10 @@ app.use((req, res, next) => {
   if (res.locals.user && !req.user) req.user = res.locals.user;
 
   // EJS wont crash if these are undefined
-  if (typeof res.locals.successMessage === "undefined") res.locals.successMessage = null;
-  if (typeof res.locals.errorMessage === "undefined") res.locals.errorMessage = null;
+  if (typeof res.locals.successMessage === "undefined")
+    res.locals.successMessage = null;
+  if (typeof res.locals.errorMessage === "undefined")
+    res.locals.errorMessage = null;
   if (typeof res.locals.errors === "undefined") res.locals.errors = null;
   if (typeof res.locals.values === "undefined") res.locals.values = {};
 
@@ -80,7 +84,7 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, "public")));
 
 // Routers
-app.use("/", blogRouter); 
+app.use("/", blogRouter);
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/", authRouter);
