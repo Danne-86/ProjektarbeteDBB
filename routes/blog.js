@@ -1,6 +1,7 @@
 // routes/blog.js
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
 
 const { authenticateToken } = require("../middleware/auth");
 const { uploadPostImage } = require("../middleware/upload");
@@ -10,13 +11,11 @@ const blogController = require("../controllers/blogController");
 router.get("/feed", blogController.getFeed);
 router.get("/posts/:id", blogController.getPostById);
 
+// Create comment
+router.post("/posts/:id/comment", authenticateToken, blogController.createComment);
+
 // Create post route with image upload handling
-router.post(
-  "/blog/create",
-  authenticateToken,
-  uploadPostImage.single("image"),
-  blogController.createPost
-);
+router.post("/blog/create", authenticateToken, uploadPostImage.single("image"), blogController.createPost);
 
 // router.get("/", (req, res) => {
 //   return res.redirect("/feed");

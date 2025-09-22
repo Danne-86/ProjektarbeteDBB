@@ -1,32 +1,122 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= title %></title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 min-h-screen">
-  <main class="container mx-auto px-4 py-8 max-w-3xl">
-    <article class="bg-white rounded-xl shadow p-6">
-      <header class="mb-4">
-        <h1 class="text-3xl font-bold mb-2"><%= post.header %></h1>
-        <div class="text-sm text-gray-500">
-          By <span class="font-medium"><%= post.username %></span>
-          · <%= new Date(post.created_at).toLocaleString() %>
-        </div>
-      </header>
-      <section class="prose max-w-none">
-        <% if (post.hero_image) { %>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <main class="container mx-auto px-4 py-8 max-w-3xl">
+      <article class="bg-white rounded-xl shadow p-6">
+        <header class="mb-4">
+          <h1 class="text-3xl font-bold mb-2"><%= post.header %></h1>
+          <div class="text-sm text-gray-500">
+            By <span class="font-medium"><%= post.username %></span>
+            · <%= new Date(post.created_at).toLocaleString() %>
+          </div>
+        </header>
+        <section class="prose max-w-none">
+          <% if (post.hero_image) { %>
           <img src="<%= post.hero_image %>" alt="Post image" class="w-full rounded-lg mb-4" />
-        <% } %>
-        <div class="whitespace-pre-wrap"><%= post.content %></div>
-      </section>
-    </article>
+          <% } %>
+          <div class="whitespace-pre-wrap"><%= post.content %></div>
+        </section>
 
-    <div class="mt-6">
-      <a href="/feed" class="text-indigo-600 hover:underline">&larr; Back to feed</a>
-    </div>
-  </main>
-</body>
+        <div class="text-sm rounded-lg bg-gray-50 p-6 shadow mt-6 mb-3">
+          <p class="text-lg font-medium pb-3">Comments</p>
+          <% if (user) { %>
+          <div class="bg-purple-50 rounded text-black">
+            <form class="p-4 flex flex-row gap-4" action="./<%= post.id %>/comment" method="POST">
+              <input
+                type="text"
+                name="comment"
+                class="rounded-md p-2 flex-grow"
+                placeholder="Write a comment..."
+                id="comment"
+              />
+              <button
+                type="submit"
+                class="inline-flex items-center justify-center rounded-md px-5 py-2.5 bg-purple-700 text-white hover:bg-purple-800 shadow-sm"
+              >
+                Send
+              </button>
+            </form>
+          </div>
+          <% } %> <% comments.forEach(comment => { %>
+
+          <div class="text-gray-500 pt-2">
+            <div class="border rounded border-gray-200 w-full flex flex-col">
+              <div class="flex flex-row gap-2">
+                <p class="font-medium">
+                  <a href="/users/<%= comment.user_id %>">
+                    <svg
+                      class="shrink-0 inline w-4 h-4"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+
+                    <span class="hover:underline"><%= comment.username %></span></a
+                  >
+                </p>
+
+                <p><%= comment.created_at %></p>
+
+                <% if (!comment.is_flagged){ %>
+                <form action="./<%= comment.post_id %>/flag" method="POST">
+                  <button
+                    type="submit"
+                    name="id"
+                    value="<%= comment.id %>"
+                    class="flex items-center border rounded text-gray-500 hover:text-red-800 border-transparent hover:border-red-300 hover:bg-red-50"
+                  >
+                    <svg
+                      class="shrink-0 inline w-4 h-4"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"
+                      />
+                    </svg>
+                  </button>
+                </form>
+                <% } else {%>
+                <div class="flex items-center border text-red-800 border-transparent">
+                  <svg
+                    class="shrink-0 inline w-4 h-4"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"
+                    />
+                  </svg>
+                </div>
+                <%}%>
+              </div>
+              <p class="text-black p-1"><%= comment.content %></p>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      </article>
+
+      <div class="mt-6">
+        <a href="/feed" class="text-indigo-600 hover:underline">&larr; Back to feed</a>
+      </div>
+    </main>
+  </body>
 </html>
