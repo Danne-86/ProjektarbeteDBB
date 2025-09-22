@@ -84,12 +84,13 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, "public")));
 
 // Routers
-app.use("/", blogRouter);
+
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/", authRouter);
 app.use("/admin", adminRouter);
 app.use("/profile", profileRouter);
+app.use("/blog", blogRouter);
 
 // 404
 app.use(function (req, res, next) {
