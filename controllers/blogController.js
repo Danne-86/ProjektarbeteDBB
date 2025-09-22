@@ -71,16 +71,13 @@ function createPost(req, res) {
       [req.user.id, title, content, heroPath]
     );
 
-    return res.render("blogpage", {
-      title: "Create Blog Post",
-      user: req.user,
-      isAuthenticated: true,
-      successMessage: "Post created successfully!",
-      errorMessage: null
-    });
+    // Redirect to blog feed with success message
+ req.session.successMessage = "Post created successfully!";
+    return res.redirect("/blog");
+
   } catch (err) {
     console.error(err);
-    return res.render("blogpage", {
+    return res.status(500).render("blogpage", {
       title: "Create Blog Post",
       user: req.user,
       isAuthenticated: true,
