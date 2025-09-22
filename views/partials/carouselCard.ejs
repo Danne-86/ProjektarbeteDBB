@@ -1,18 +1,18 @@
 <a href="posts/<%= post.id %>"
     class="carousel-item flex-[0_0_calc(100%_/_1_-_0.25rem)] lg:flex-[0_0_calc(100%_/_3_-_0.75rem)] text-center snap-start">
     <div class="grid grid-cols-3 space-between bg-[#A7ADBA]">
-        <img src="<%= post.avatar %>" alt="avatar" class="m-1 shrink-0 rounded-full object-cover object-center ring-1 ring-gray-300
+        <img src="<%= post.avatar_url %>" alt="avatar" class="m-1 shrink-0 rounded-full object-cover object-center ring-1 ring-gray-300
                   size-5" />
-        <h3 class="truncate">
-            <%= post.title %>
+        <h3 class="truncate text-black">
+            <%= post.header %>
         </h3>
     </div>
     <div class="relative">
         <img class="block w-full h-auto aspect-[9/7] rounded-b-lg"
-            src="<%= post.post_images ? post.post_images : '/img/postplaceholder.jpg' %>" alt="image for <%= post.title %>">
+            src="<%= post.hero_image ? post.hero_image : '/img/postplaceholder.jpg' %>" alt="image for <%= post.header %>">
     </div>
     <div class="line-clamp-3">
-        <p>
+        <p class="text-black">
             <%= post.content %>
         </p>
     </div>
