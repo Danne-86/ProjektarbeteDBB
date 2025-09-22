@@ -24,7 +24,8 @@ function getPostById(req, res) {
     SELECT p.id, p.header, p.content, p.created_at, p.hero_image, u.username
     FROM posts p
     JOIN users u ON u.id = p.user_id
-    WHERE p.id = ?`
+    WHERE p.id = ?
+    ORDER BY p.created_at DESC`
     )
     .get(id);
   const comments = db
@@ -33,10 +34,11 @@ function getPostById(req, res) {
       SELECT c.id, c.user_id, c.post_id, c.content, c.created_at, c.is_flagged, u.username
       FROM comments c
       JOIN users u ON u.id = c.user_id
-      WHERE post_id = ?`
+      WHERE post_id = ?
+      ORDER BY c.created_at DESC`
     )
     .all(id);
-  if (!post) return res.status(404).render("error", { message: "Post not found" });
+  if (!post) return res.status(404).render("error", { error: "Post not found" });
 
   res.render("post", { title: post.header, post, comments, user: req.user });
 }
@@ -105,7 +107,13 @@ function createPost(req, res) {
 
 function createComment(req, res) {
   try {
-    if (!req.user || !req.user.id) {
+    const user = req.user;
+    const postId = req.params.id;
+    const post = db.prepare("SELECT * FROM posts WHERE id = ?").get(postId);
+
+    if (!post) return res.status(404).render("error", { error: "Post not found" });
+
+    if (!user || !user.id) {
       return res.status(401).render("login", {
         title: "Login",
         errors: ["Please log in to continue."],
@@ -113,21 +121,19 @@ function createComment(req, res) {
         values: {},
       });
     }
-    const postId = req.params.id;
-    const post = db.prepare("SELECT * FROM posts WHERE id = ?").get(postId);
 
-    let { comment } = req.body;
-    comment = (comment || "").trim();
+    const comment = req.body.comment.trim();
 
     let errors = [];
+
     if (!comment) errors.push("Comment is required.");
     if (comment.length > 500) errors.push("Content must be ≤ 500 characters.");
 
-    if (errors.length) {
-      return res.render("post", {
+    if (errors.length > 0) {
+      return res.status(400).render("post", {
         title: post.header,
         post,
-        user: req.user,
+        user,
         isAuthenticated: true,
         errorMessage: errors.join(" "),
         successMessage: null,
@@ -135,29 +141,35 @@ function createComment(req, res) {
     }
 
     db.prepare("INSERT INTO comments (user_id, post_id, content) VALUES (?, ?, ?)").run(
-      req.user.id,
+      user.id,
       postId,
       comment
     );
 
-    res.render("post", {
-      title: post.header,
-      post,
-      user: req.user,
-      isAuthenticated: true,
-      successMessage: "Comment created successfully!",
-      errorMessage: null,
-    });
+    res.redirect(`/blog/posts/${postId}`);
   } catch (err) {
-    console.error(err);
+    console.error("Error in createComment", err);
     return res.render("post", {
-      title: post.header,
+      title: "Error",
       post,
-      user: req.user,
+      user,
       isAuthenticated: true,
       errorMessage: "Error creating comment.",
-      successMessage: null,
+      errorMessage: null,
     });
   }
 }
-module.exports = { getFeed, getPostById, createPost, createComment };
+
+function flagPost(req, res) {
+  res.send("Flag post");
+}
+
+function flagComment(req, res) {
+  res.send("Flag comment");
+}
+
+function likePost(req, res) {
+  res.send("Like post");
+}
+
+module.exports = { getFeed, getPostById, createPost, createComment, flagPost, flagComment, likePost };

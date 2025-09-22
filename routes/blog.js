@@ -14,6 +14,13 @@ router.get("/posts/:id", blogController.getPostById);
 // Create comment
 router.post("/posts/:id/comment", authenticateToken, blogController.createComment);
 
+// Report
+router.post("/posts/:id/flag", authenticateToken, blogController.flagPost);
+router.post("/comments/:id/flag", authenticateToken, blogController.flagComment);
+
+// Like
+router.post("/posts/:id/like", authenticateToken, blogController.likePost);
+
 // Create post route with image upload handling
 router.post("/blog/create", authenticateToken, uploadPostImage.single("image"), blogController.createPost);
 
