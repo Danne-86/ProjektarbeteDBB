@@ -48,6 +48,17 @@ db.exec(`
   )
     `);
 
+try {
+  const cols = db.prepare(`PRAGMA table_info(posts)`).all();
+  const hasHero = cols.some(c => c.name === "hero_image");
+  if (!hasHero) {
+    db.exec(`ALTER TABLE posts ADD COLUMN hero_image TEXT`);
+    console.log("[DB] Added posts.hero_image column");
+  }
+} catch (e) {
+  console.error("[DB] Failed to ensure posts.hero_image:", e);
+}
+
 function _normalizeArgs(sql, params, cb) {
   if (typeof params === "function") {
     return { sql, params: [], cb: params };

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <main class="container mx-auto px-4 py-8 max-w-3xl">
+    <article class="bg-white rounded-xl shadow p-6">
+      <header class="mb-4">
+        <h1 class="text-3xl font-bold mb-2"><%= post.header %></h1>
+        <div class="text-sm text-gray-500">
+          By <span class="font-medium"><%= post.username %></span>
+          · <%= new Date(post.created_at).toLocaleString() %>
+        </div>
+      </header>
+      <section class="prose max-w-none">
+        <% if (post.hero_image) { %>
+          <img src="<%= post.hero_image %>" alt="Post image" class="w-full rounded-lg mb-4" />
+        <% } %>
+        <div class="whitespace-pre-wrap"><%= post.content %></div>
+      </section>
+    </article>
+
+    <div class="mt-6">
+      <a href="/feed" class="text-indigo-600 hover:underline">&larr; Back to feed</a>
+    </div>
+  </main>
+</body>
+</html>

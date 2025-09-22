@@ -21,6 +21,10 @@ router.get('/', function (req, res, next) {
   });
 });
 
+router.get("/", (req, res) => {
+  return res.redirect("/feed");
+});
+
 // GET blog page
 router.get("/blog", (req, res) => {
   res.render("blogpage", {
