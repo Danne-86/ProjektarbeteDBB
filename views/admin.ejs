@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/stylesheets/style.css" />
   </head>
   <body class="bg-gray-50 min-h-screen">
-    <main class="mx-auto max-w-7xl p-6">
+    <div class="mx-auto max-w-7xl p-6">
       <h1 class="text-2xl font-bold mb-2"><%= title %></h1>
       <form method="GET" action="/admin" class="my-6">
         <input type="hidden" name="flagged" value="<%= showFlagged ? false : true %>" />
@@ -35,11 +35,11 @@
       const filteredPosts = showFlagged ? posts.filter(post => post.is_flagged ||
       filteredComments.some(comment => comment.post_id === post.id)) : posts; %>
 
-      <div class="overflow-x-auto bg-white rounded-xl shadow mb-6">
+      <div class="overflow-x-auto bg-white rounded-md shadow mb-6">
         <table class="w-full text-left border-collapse">
-          <thead class="bg-gray-200">
+          <thead class="bg-gray-200 text-gray-700">
             <tr>
-              <th class="px-4 py-1 w-8 text-center">
+              <th class="w-6 text-center">
                 <svg
                   class="shrink-0 inline w-4 h-4 m-1"
                   aria-hidden="true"
@@ -52,23 +52,23 @@
                   />
                 </svg>
               </th>
-              <th class="px-4 py-1"></th>
-              <th class="px-4 py-1">
+              <th class="px-1 py-2"></th>
+              <th class="px-1 py-2">
                 <div class="flex items-center">
                   <p>User</p>
                 </div>
               </th>
-              <th class="px-4 py-1 w-40 hidden lg:block">
+              <th class="px-1 py-2 hidden lg:block">
                 <div class="flex items-center">
                   <p>Date</p>
                 </div>
               </th>
-              <th class="px-2 py-1 w-8 text-center">
+              <th class="px-1 py-2 text-center">
                 <div class="flex items-center">
                   <p>Unflag</p>
                 </div>
               </th>
-              <th class="px-2 w-8 text-center">
+              <th class="px-1 text-center">
                 <div class="flex items-center">
                   <p>Delete</p>
                 </div>
@@ -76,11 +76,10 @@
             </tr>
           </thead>
           <tbody>
-            <!-- Post -->
-            <!-- TODO: Confirmation on delete/unflag -->
             <% filteredPosts.forEach((post) => { %>
+            <!-- Post -->
             <tr class="bg-purple-50 hover:bg-purple-100">
-              <td class="px-4 text-red-800 text-center">
+              <td class="px-1 text-red-800 text-center">
                 <% if (post.is_flagged == true) { %>
                 <svg
                   class="shrink-0 inline w-4 h-4 m-1"
@@ -95,8 +94,8 @@
                 </svg>
                 <% } %>
               </td>
-              <td class="px-3 font-semibold">
-                <a href="/posts/<%= post.id %>" class="hover:text-purple-700 hover:underline">
+              <td class="px-1 font-semibold">
+                <a href="/posts/<%= post.id %>" class="text-gray-700 hover:text-purple-700 hover:underline">
                   <button class="flex items-center">
                     <div
                       class="me-2 flex items-center text-purple-700 border border-purple-300 rounded bg-purple-50 hover:bg-purple-700 hover:text-white"
@@ -120,13 +119,13 @@
                         />
                       </svg>
                     </div>
-                    <p><%= post.title %></p>
+                    <p><%= post.header %></p>
                   </button>
                 </a>
               </td>
-              <td class="px-4">
+              <td class="px-1">
                 <a href="/users/<%= post.user_id %>">
-                  <button class="flex items-center hover:text-purple-700 hover:underline">
+                  <button class="text-gray-700 flex items-center hover:text-purple-700 hover:underline">
                     <div class="flex items-center">
                       <svg
                         class="shrink-0 inline w-4 h-4 m-1"
@@ -146,8 +145,8 @@
                   </button>
                 </a>
               </td>
-              <td class="px-4 hidden lg:block">
-                <div class="flex items-center">
+              <td class="px-1 hidden lg:block">
+                <div class="flex items-center text-gray-700">
                   <svg
                     class="w-4 h-4 inline m-1"
                     aria-hidden="true"
@@ -164,7 +163,7 @@
                   <p><%= post.created_at %></p>
                 </div>
               </td>
-              <td class="px-4">
+              <td class="px-1">
                 <% if (post.is_flagged == true) { %>
                 <form action="/admin/posts/unflag" method="POST">
                   <input type="hidden" name="showFlagged" value="<%= showFlagged %>" />
@@ -193,7 +192,7 @@
                 </form>
                 <% } %>
               </td>
-              <td class="px-4">
+              <td class="px-1">
                 <form action="/admin/posts/delete" method="POST">
                   <input type="hidden" name="showFlagged" value="<%= showFlagged %>" />
                   <button
@@ -220,11 +219,10 @@
               </td>
             </tr>
 
-            <!-- Comment -->
-            <!-- TODO: Confirmation on delete/unflag -->
             <% filteredComments.forEach((comment) => { %> <% if (comment.post_id === post.id) { %>
+            <!-- Comment -->
             <tr class="hover:bg-purple-100">
-              <td class="px-4 text-red-800 text-center">
+              <td class="px-1 text-red-800 text-center">
                 <% if (comment.is_flagged == true) { %>
                 <svg
                   class="shrink-0 inline w-4 h-4 m-1"
@@ -239,7 +237,7 @@
                 </svg>
                 <% } %>
               </td>
-              <td class="px-12 text-xs">
+              <td class="px-6 text-xs text-gray-700">
                 <div class="flex items-center">
                   <svg
                     class="shrink-0 inline w-4 h-4 m-1"
@@ -257,9 +255,9 @@
                   <p><%= comment.content %></p>
                 </div>
               </td>
-              <td class="px-4">
+              <td class="px-1">
                 <a href="/users/<%= comment.user_id %>">
-                  <button class="flex items-center hover:text-purple-700 hover:underline">
+                  <button class="text-gray-700 flex items-center hover:text-purple-700 hover:underline">
                     <div class="flex items-center">
                       <svg
                         class="shrink-0 inline w-4 h-4 m-1"
@@ -279,8 +277,8 @@
                   </button>
                 </a>
               </td>
-              <td class="px-4 hidden lg:block">
-                <div class="flex items-center">
+              <td class="px-1 hidden lg:block">
+                <div class="flex items-center text-gray-700">
                   <svg
                     class="w-4 h-4 inline m-1"
                     aria-hidden="true"
@@ -297,7 +295,7 @@
                   <p><%= comment.created_at %></p>
                 </div>
               </td>
-              <td class="px-4">
+              <td class="px-1">
                 <% if (comment.is_flagged == true) { %>
                 <form action="/admin/comments/unflag" method="POST">
                   <input type="hidden" name="showFlagged" value="<%= showFlagged %>" />
@@ -326,7 +324,7 @@
                 </form>
                 <% } %>
               </td>
-              <td class="px-4">
+              <td class="px-1">
                 <form action="/admin/comments/delete" method="POST">
                   <input type="hidden" name="showFlagged" value="<%= showFlagged %>" />
                   <button
@@ -352,13 +350,13 @@
                 </form>
               </td>
             </tr>
-            <% }}) %> <% }) %>
             <!-- End Comment -->
-
+            <% }}) %>
             <!-- End Post -->
+            <% }) %>
           </tbody>
         </table>
       </div>
-    </main>
+    </div>
   </body>
 </html>

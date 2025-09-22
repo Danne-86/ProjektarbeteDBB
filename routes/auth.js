@@ -1,18 +1,29 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const db = require("../db");
+const { issueAuthCookie } = require("../utils/authToken"); // used on login only
 
 const router = express.Router();
 
+// Logout: clear JWT + session cookie
 router.get("/logout", (req, res) => {
-  if (req.session) req.session.destroy(() => res.redirect("/"));
-  else res.redirect("/");
+  res.clearCookie("auth_token");
+  if (req.session) {
+    req.session.destroy(() => {
+      res.clearCookie("sid"); // session cookie name from app.js
+      res.redirect("/");
+    });
+  } else {
+    res.redirect("/");
+  }
 });
 
+// Register (form)
 router.get("/register", (req, res) => {
   res.render("register", { title: "Register", errors: [], values: {} });
 });
 
+// Register (submit) —> redirect to /login (no auto-login)
 router.post("/register", (req, res) => {
   let { username, email, password, passwordConfirm } = req.body;
 
@@ -90,9 +101,10 @@ router.post("/register", (req, res) => {
                   values,
                 });
               }
-              // Auto-login
-              req.session.user = { id: this.lastID, username, email };
-              return res.redirect("/");
+
+              // NO auto-login here: do not set session or JWT cookie.
+              // Send them to the login page with a flag.
+              return res.redirect("/login?registered=1");
             }
           );
         }
@@ -101,13 +113,20 @@ router.post("/register", (req, res) => {
   );
 });
 
+// Login (form) — supports success message after registration
 router.get("/login", (req, res) => {
-  res.render("login", { title: "Login", errors: [], values: {} });
+  const justRegistered = req.query.registered === "1";
+  res.render("login", {
+    title: "Login",
+    errors: [],
+    values: {},
+    success: justRegistered ? "Account created! You can log in now." : null,
+  });
 });
 
+// Login (submit) — sets JWT + session
 router.post("/login", (req, res) => {
   let { email, password } = req.body;
-
   email = (email || "").trim().toLowerCase();
 
   const errors = [];
@@ -115,7 +134,9 @@ router.post("/login", (req, res) => {
 
   if (!email || !password) {
     errors.push("Email and password are required.");
-    return res.status(400).render("login", { title: "Login", errors, values });
+    return res
+      .status(400)
+      .render("login", { title: "Login", errors, values, success: null });
   }
 
   db.get(
@@ -128,6 +149,7 @@ router.post("/login", (req, res) => {
           title: "Login",
           errors: ["Server error. Try again."],
           values,
+          success: null,
         });
       }
       if (!user) {
@@ -135,6 +157,7 @@ router.post("/login", (req, res) => {
           title: "Login",
           errors: ["Invalid credentials."],
           values,
+          success: null,
         });
       }
 
@@ -144,17 +167,26 @@ router.post("/login", (req, res) => {
           title: "Login",
           errors: ["Invalid credentials."],
           values,
+          success: null,
         });
       }
 
-      req.session.user = {
+      const payload = {
         id: user.id,
         username: user.username,
         email: user.email,
+        is_admin: user.is_admin,
         avatar_url:
           user.avatar_url || "/avatars/SpongeBob_SquarePants_character.png",
       };
-      res.redirect("/");
+
+      // JWT for protected routes
+      issueAuthCookie(res, payload);
+
+      // Session for EJS
+      req.session.user = payload;
+
+      return res.redirect("/");
     }
   );
 });
