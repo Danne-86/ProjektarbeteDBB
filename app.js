@@ -12,9 +12,7 @@ const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const authRouter = require("./routes/auth");
 const adminRouter = require("./routes/admin");
-const profileRouter = require("./routes/profile");
-
-const { SECRET } = require("./utils/authToken");
+const blogRouter = require("./routes/blog");
 
 const app = express();
 
@@ -32,10 +30,7 @@ app.use(cookieParser());
 app.use(expressLayouts);
 app.set("layout", "layouts/base");
 
-// If behind a proxy/HTTPS in prod, uncomment:
-// app.set("trust proxy", 1);
-
-// Sessions (used for EJS state)
+// Sessions
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "dev-secret",
@@ -55,6 +50,14 @@ app.use(
 app.use((req, res, next) => {
   res.locals.isAuthenticated = !!(req.session && req.session.user);
   res.locals.user = req.session ? req.session.user : null;
+  if (res.locals.user && !req.user) req.user = res.locals.user;
+
+  // EJS wont crash if these are undefined
+  if (typeof res.locals.successMessage === "undefined") res.locals.successMessage = null;
+  if (typeof res.locals.errorMessage === "undefined") res.locals.errorMessage = null;
+  if (typeof res.locals.errors === "undefined") res.locals.errors = null;
+  if (typeof res.locals.values === "undefined") res.locals.values = {};
+
   next();
 });
 
@@ -76,7 +79,8 @@ app.use((req, res, next) => {
 // Static assets
 app.use(express.static(path.join(__dirname, "public")));
 
-// Routers (mount after sessions/locals)
+// Routers
+app.use("/", blogRouter); 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/", authRouter);

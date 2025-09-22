@@ -1,9 +1,43 @@
-exports.createPost = (req, res) => {
+const db = require("../db");
+
+function getFeed(req, res) {
+  const posts = db.all(`
+    SELECT p.id, p.header, p.content, p.created_at, p.hero_image, u.username
+    FROM posts p
+    JOIN users u ON u.id = p.user_id
+    ORDER BY p.created_at DESC
+  `);
+
+  const mapped = posts.map(p => ({
+    ...p,
+    excerpt: (p.content || "").slice(0, 220) + ((p.content || "").length > 220 ? "…" : "")
+  }));
+
+  res.render("feed", { title: "Blog feed", posts: mapped });
+}
+
+function getPostById(req, res) {
+  const { id } = req.params;
+  const post = db.get(`
+    SELECT p.id, p.header, p.content, p.created_at, p.hero_image, u.username
+    FROM posts p
+    JOIN users u ON u.id = p.user_id
+    WHERE p.id = ?
+  `, [id]);
+
+  if (!post) return res.status(404).render("error", { message: "Post not found" });
+
+  res.render("post", { title: post.header, post });
+}
+
+function createPost(req, res) {
   try {
     if (!req.user || !req.user.id) {
       return res.status(401).render("login", {
         title: "Login",
-        errorMessage: "You must be logged in to create posts."
+        errors: ["Please log in to continue."],
+        errorMessage: null,
+        values: {}
       });
     }
 
@@ -27,7 +61,8 @@ exports.createPost = (req, res) => {
         title: "Create Blog Post",
         user: req.user,
         isAuthenticated: true,
-        errorMessage: errors.join(" ")
+        errorMessage: errors.join(" "),
+        successMessage: null
       });
     }
 
@@ -40,7 +75,8 @@ exports.createPost = (req, res) => {
       title: "Create Blog Post",
       user: req.user,
       isAuthenticated: true,
-      successMessage: "Post created successfully!"
+      successMessage: "Post created successfully!",
+      errorMessage: null
     });
   } catch (err) {
     console.error(err);
@@ -48,7 +84,10 @@ exports.createPost = (req, res) => {
       title: "Create Blog Post",
       user: req.user,
       isAuthenticated: true,
-      errorMessage: "Error creating post."
+      errorMessage: "Error creating post.",
+      successMessage: null
     });
   }
-};
+}
+
+module.exports = { getFeed, getPostById, createPost };
