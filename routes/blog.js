@@ -16,7 +16,7 @@ router.post("/posts/:id/comment", authenticateToken, blogController.createCommen
 
 // Report
 router.post("/posts/:id/flag", authenticateToken, blogController.flagPost);
-router.post("/comments/:id/flag", authenticateToken, blogController.flagComment);
+router.post("/posts/:postId/:commentId/flag", authenticateToken, blogController.flagComment);
 
 // Like
 router.post("/posts/:id/like", authenticateToken, blogController.likePost);

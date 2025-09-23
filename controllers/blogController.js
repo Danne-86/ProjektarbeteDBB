@@ -38,22 +38,27 @@ function getPostById(req, res) {
       ORDER BY c.created_at DESC`
     )
     .all(id);
+  const likes = db
+    .prepare(
+      `
+    SELECT
+      COUNT (*) AS count,
+      EXISTS (SELECT 1 FROM likes WHERE user_id = ? AND post_id = ?) AS by_user
+    FROM likes
+    WHERE post_id = ?`
+    )
+    .get(req.user?.id || 0, id, id);
+
+  const likesCount = likes?.count;
+  const likedByUser = likes?.by_user;
+
   if (!post) return res.status(404).render("error", { error: "Post not found" });
 
-  res.render("post", { title: post.header, post, comments, user: req.user });
+  res.render("post", { title: post.header, post, comments, user: req.user, likesCount, likedByUser });
 }
 
 function createPost(req, res) {
   try {
-    if (!req.user || !req.user.id) {
-      return res.status(401).render("login", {
-        title: "Login",
-        errors: ["Please log in to continue."],
-        errorMessage: null,
-        values: {},
-      });
-    }
-
     let { title, content } = req.body;
     title = (title || "").trim();
     content = (content || "").trim();
@@ -109,23 +114,13 @@ function createComment(req, res) {
   try {
     const user = req.user;
     const postId = req.params.id;
+
     const post = db.prepare("SELECT * FROM posts WHERE id = ?").get(postId);
-
     if (!post) return res.status(404).render("error", { error: "Post not found" });
-
-    if (!user || !user.id) {
-      return res.status(401).render("login", {
-        title: "Login",
-        errors: ["Please log in to continue."],
-        errorMessage: null,
-        values: {},
-      });
-    }
-
-    const comment = req.body.comment.trim();
 
     let errors = [];
 
+    const comment = req.body.comment.trim();
     if (!comment) errors.push("Comment is required.");
     if (comment.length > 500) errors.push("Content must be ≤ 500 characters.");
 
@@ -167,15 +162,13 @@ function flagPost(req, res) {
 }
 
 function flagComment(req, res) {
-  const { id } = req.params;
-  db.prepare(`UPDATE comments SET is_flagged = 1 WHERE id = ?`).run(id);
-  res.redirect(`/blog/comments/${id}`);
+  const { postId, commentId } = req.params;
+  db.prepare(`UPDATE comments SET is_flagged = 1 WHERE id = ?`).run(commentId);
+  res.redirect(`/blog/posts/${postId}`);
 }
 
 function likePost(req, res) {
   const postId = req.params.id;
-  //TODO: UNCOMMENT WHEN DB TABLE LIKES EXISTS
-  /*
   const userId = req.user?.id;
 
   if (!userId) {
@@ -190,7 +183,7 @@ function likePost(req, res) {
   const result = db.prepare("DELETE FROM likes WHERE user_id = ? AND post_id = ?").run(userId, postId);
   if (result.changes === 0)
     db.prepare("INSERT OR IGNORE INTO likes (user_id, post_id) VALUES (?, ?)").run(userId, postId);
-  */
+
   res.redirect(`/blog/posts/${postId}`);
 }
 
