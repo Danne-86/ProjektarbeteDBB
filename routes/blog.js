@@ -18,7 +18,7 @@ function requireLoginRedirect(req, res, next) {
 }
 
 // Blog -> feed (public)
-router.get("/", blogController.getFeed);
+router.get("/", requireLoginRedirect, blogController.getMyPosts);
 
 // /blog/new -> post page (requires login)
 router.get("/new", requireLoginRedirect, (req, res) => {

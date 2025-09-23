@@ -1,4 +1,5 @@
 const db = require("../db");
+const { get } = require("../routes");
 
 function getFeed(req, res) {
   const posts = db.all(`
@@ -14,6 +15,24 @@ function getFeed(req, res) {
   }));
 
   res.render("feed", { title: "Blog feed", posts: mapped });
+}
+
+function getMyPosts(req, res) {
+  const userID = req.user?.id;
+  const posts = db.all(`
+    SELECT p.id, p.header, p.content, p.created_at, p.hero_image, u.username
+    FROM posts p
+    JOIN users u ON u.id = p.user_id
+    WHERE p.user_id = ?
+    ORDER BY p.created_at DESC
+  `, [userID]);
+
+  const mapped = posts.map(p => ({
+    ...p,
+    excerpt: (p.content || "").slice(0, 220) + ((p.content || "").length > 220 ? "…" : "")
+  }));
+
+  res.render("feed", { title: "My Posts", posts: mapped });
 }
 
 function getPostById(req, res) {
@@ -73,8 +92,7 @@ function createPost(req, res) {
 
     // Redirect to blog feed with success message
  req.session.successMessage = "Post created successfully!";
-    return res.redirect("/blog");
-
+    return res.redirect("/feed");
   } catch (err) {
     console.error(err);
     return res.status(500).render("blogpage", {
@@ -87,4 +105,4 @@ function createPost(req, res) {
   }
 }
 
-module.exports = { getFeed, getPostById, createPost };
+module.exports = { getFeed, getPostById, createPost, getMyPosts };

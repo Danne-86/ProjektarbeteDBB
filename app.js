@@ -13,6 +13,7 @@ const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const authRouter = require("./routes/auth");
 const adminRouter = require("./routes/admin");
+const feedRouter = require("./routes/feed");
 const blogRouter = require("./routes/blog");
 const profileRouter = require("./routes/profile");
 
@@ -96,12 +97,13 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Routers
 
+app.use("/feed", feedRouter);
+app.use("/blog", blogRouter);
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/", authRouter);
 app.use("/admin", adminRouter);
 app.use("/profile", profileRouter);
-app.use("/blog", blogRouter);
 
 // 404
 app.use(function (req, res, next) {
