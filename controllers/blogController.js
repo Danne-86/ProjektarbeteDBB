@@ -161,15 +161,37 @@ function createComment(req, res) {
 }
 
 function flagPost(req, res) {
-  res.send("Flag post");
+  const { id } = req.params;
+  db.prepare(`UPDATE posts SET is_flagged = 1 WHERE id = ?`).run(id);
+  res.redirect(`/blog/posts/${id}`);
 }
 
 function flagComment(req, res) {
-  res.send("Flag comment");
+  const { id } = req.params;
+  db.prepare(`UPDATE comments SET is_flagged = 1 WHERE id = ?`).run(id);
+  res.redirect(`/blog/comments/${id}`);
 }
 
 function likePost(req, res) {
-  res.send("Like post");
+  const postId = req.params.id;
+  //TODO: UNCOMMENT WHEN DB TABLE LIKES EXISTS
+  /*
+  const userId = req.user?.id;
+
+  if (!userId) {
+    return res.status(401).render("login", {
+      title: "Login",
+      errors: ["Please log in to continue."],
+      errorMessage: null,
+      values: {},
+    });
+  }
+
+  const result = db.prepare("DELETE FROM likes WHERE user_id = ? AND post_id = ?").run(userId, postId);
+  if (result.changes === 0)
+    db.prepare("INSERT OR IGNORE INTO likes (user_id, post_id) VALUES (?, ?)").run(userId, postId);
+  */
+  res.redirect(`/blog/posts/${postId}`);
 }
 
 module.exports = { getFeed, getPostById, createPost, createComment, flagPost, flagComment, likePost };
