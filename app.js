@@ -99,7 +99,7 @@ app.use(express.static(path.join(__dirname, "public")));
 // Routers
 
 app.use("/u", authorRouter);
-app.use("/feed", feedRouter);
+app.use("/", feedRouter);
 app.use("/blog", blogRouter);
 app.use("/", indexRouter);
 app.use("/users", usersRouter);

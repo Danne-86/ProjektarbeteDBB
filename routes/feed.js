@@ -4,9 +4,9 @@ const router = express.Router();
 const blogController = require("../controllers/blogController");
 
 // /feed → all posts (public)
-router.get("/", blogController.getFeed);
+router.get("/feed", blogController.getFeed);
 
-// /feed/:id → single post (public)
-router.get("/:id", blogController.getPostById);
+// /posts/:id → single post (public)
+router.get("/posts/:id", blogController.getPostById);
 
 module.exports = router;
