@@ -129,9 +129,7 @@ router.get("/:id", authenticateToken, (req, res) => {
 
   try {
     const profileUser = db
-      .prepare(
-        "SELECT id, username, email, bio, avatar_url FROM users WHERE id = ?"
-      )
+      .prepare("SELECT id, username, bio, avatar_url FROM users WHERE id = ?")
       .get(userId);
 
     if (!profileUser) {

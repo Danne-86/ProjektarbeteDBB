@@ -1,19 +1,22 @@
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title><%= title %></title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+
 <main class="mx-auto max-w-4xl px-4 py-8">
-  <h1 class="text-2xl font-semibold mb-6">Your Profile</h1>
+  <h1 class="text-2xl font-semibold mb-6">
+    <%= isOwnProfile ? "Your Profile" : (user?.username + "'s Profile") %>
+  </h1>
 
   <% if (typeof error !== 'undefined' && error) { %>
     <div class="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-red-800"><%= error %></div>
   <% } %>
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-    <!-- Avatar -->
+    <!-- Avatar / Actions -->
     <section class="md:col-span-1">
       <div class="rounded-xl border bg-white p-4">
         <img
@@ -21,47 +24,88 @@
           alt="avatar"
           class="w-32 h-32 rounded-full object-cover mx-auto mb-4 border"
         />
-        <form action="/profile/avatar" method="post" enctype="multipart/form-data" class="space-y-3">
-          <label class="block text-sm font-medium">Change avatar</label>
-          <input type="file" name="avatar" accept="image/*" class="block w-full text-sm" required />
-          <button class="mt-2 inline-flex items-center justify-center rounded-lg border px-4 py-2 hover:bg-gray-50">
-            Upload
-          </button>
-        </form>
+
+        <% if (isOwnProfile) { %>
+          <!-- Own profile: upload avatar -->
+          <form action="/profile/avatar" method="post" enctype="multipart/form-data" class="space-y-3">
+            <label class="block text-sm font-medium">Change avatar</label>
+            <input type="file" name="avatar" accept="image/*" class="block w-full text-sm" required />
+            <button class="mt-2 inline-flex items-center justify-center rounded-lg border px-4 py-2 hover:bg-gray-50">
+              Upload
+            </button>
+          </form>
+        <% } else { %>
+          <!-- Other user's profile: Follow/Unfollow (POST for both) -->
+          <form
+            action="/users/<%= user.id %>/<%= isFollowing ? 'unfollow' : 'follow' %>"
+            method="POST"
+            class="space-y-2"
+          >
+            <!-- redirect back to where the user clicked -->
+            <input type="hidden" name="redirect" value="<%= originalUrl %>" />
+
+            <button
+              type="submit"
+              class="w-full inline-flex items-center justify-center rounded-lg border px-4 py-2
+                     <%= isFollowing ? 'bg-red-600 text-white hover:bg-red-700 border-red-600' : 'hover:bg-gray-50' %>">
+              <%= isFollowing ? 'Unfollow' : 'Follow' %>
+            </button>
+          </form>
+        <% } %>
       </div>
     </section>
 
-    <!-- Profile form -->
     <section class="md:col-span-2">
-  <form action="/profile" method="post" class="rounded-xl border bg-white p-4 space-y-4">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label class="block text-sm font-medium">Username</label>
-        <input type="text" name="username" value="<%= user?.username || '' %>"
-               class="mt-1 w-full rounded-md border px-3 py-2" required />
-      </div>
-      <div>
-        <label class="block text-sm font-medium">Email</label>
-        <input type="email" value="<%= user?.email || '' %>"
-               class="mt-1 w-full rounded-md border px-3 py-2 bg-gray-100 text-gray-500 cursor-not-allowed"
-               readonly />
-      </div>
-    </div>
-    <div>
-      <label class="block text-sm font-medium">Bio</label>
-      <textarea name="bio" rows="5" class="mt-1 w-full rounded-md border px-3 py-2"
-                placeholder="Tell people about yourself..."><%= user?.bio || '' %></textarea>
-    </div>
+      <% if (isOwnProfile) { %>
+        <form action="/profile" method="post" class="rounded-xl border bg-white p-4 space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium">Username</label>
+              <input type="text" name="username" value="<%= user?.username || '' %>"
+                    class="mt-1 w-full rounded-md border px-3 py-2" required />
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Email</label>
+              <input type="email" value="<%= user?.email || '' %>"
+                    class="mt-1 w-full rounded-md border px-3 py-2 bg-gray-100 text-gray-500 cursor-not-allowed"
+                    readonly />
+            </div>
+          </div>
 
-    <div class="flex items-center gap-3">
-      <button class="inline-flex items-center justify-center rounded-lg border px-4 py-2 hover:bg-gray-50">
-        Save changes
-      </button>
-      <a href="/" class="text-sm text-gray-600 hover:underline">Cancel</a>
-    </div>
-  </form>
-</section>
+          <div>
+            <label class="block text-sm font-medium">Bio</label>
+            <textarea name="bio" rows="5" class="mt-1 w-full rounded-md border px-3 py-2"
+                    placeholder="Tell people about yourself..."><%= user?.bio || '' %></textarea>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button class="inline-flex items-center justify-center rounded-lg border px-4 py-2 hover:bg-gray-50">
+              Save changes
+            </button>
+            <a href="/" class="text-sm text-gray-600 hover:underline">Cancel</a>
+          </div>
+        </form>
+      <% } else { %>
+        <div class="rounded-xl border bg-white p-4 space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <div class="text-sm font-medium text-gray-500">Username</div>
+              <div class="mt-1 text-lg"><%= user?.username %></div>
+            </div>
+            <% if (isOwnProfile) { %>
++             <div>
++               <div class="text-sm font-medium text-gray-500">Email</div>
++               <div class="mt-1"><%= user?.email %></div>
++             </div>
++           <% } %>
+          </div>
+
+          <div>
+            <div class="text-sm font-medium text-gray-500">Bio</div>
+            <p class="mt-1 whitespace-pre-wrap"><%= user?.bio || 'No bio yet' %></p>
+          </div>
+        </div>
+      <% } %>
+    </section>
   </div>
 </main>
-
-
