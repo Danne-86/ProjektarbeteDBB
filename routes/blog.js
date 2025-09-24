@@ -1,6 +1,5 @@
 // routes/blog.js
 const express = require("express");
-const multer = require("multer");
 const router = express.Router();
 
 // const { authenticateToken } = require("../middleware/auth");
@@ -17,10 +16,8 @@ function requireLoginRedirect(req, res, next) {
   return res.redirect(`/login?returnTo=${returnTo}`);
 }
 
-// Blog -> feed (public)
-router.get("/feed", (req, res) => {
-  blogController.getFeed(req, res);
-});
+// blog -> Private: get my posts
+router.get("/", requireLoginRedirect, blogController.getMyPosts);
 
 // /blog/new -> post page (requires login)
 router.get("/new", requireLoginRedirect, (req, res) => {
