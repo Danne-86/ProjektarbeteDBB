@@ -107,7 +107,6 @@ app.use((req, res, next) => {
     req.path.startsWith("/logos") ||
     req.path.startsWith("/avatars") ||
     req.path.startsWith("/posts/") || // images you upload
-    req.path.startsWith("/javascripts") ||
     req.path.startsWith("/stylesheets") ||
     req.path.startsWith("/img") ||
     req.path === "/favicon.ico";
