@@ -1,11 +1,9 @@
-// ProjektarbeteDBB/ProjektarbeteDBB/routes/profile.js
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
 const { authenticateToken } = require("../middleware/auth");
 const { uploadAvatar } = require("../middleware/upload");
 
-// Ensure columns bio + avatar_url exist
 (function ensureOptionalColumns() {
   const alters = [
     "ALTER TABLE users ADD COLUMN bio TEXT",
@@ -14,15 +12,10 @@ const { uploadAvatar } = require("../middleware/upload");
   for (const sql of alters) {
     try {
       db.run(sql);
-    } catch (_) {
-      /* ignore if column exists */
-    }
+    } catch (_) {}
   }
 })();
 
-/**
- * GET /profile
- */
 router.get("/", authenticateToken, (req, res) => {
   try {
     const user = db
@@ -30,15 +23,20 @@ router.get("/", authenticateToken, (req, res) => {
         "SELECT id, username, email, bio, avatar_url FROM users WHERE id = ?"
       )
       .get(req.user.id);
+
     if (!user) {
       return res
         .status(404)
         .render("error", { message: "User not found", error: {} });
     }
+
     res.render("profile", {
       title: "Your Profile",
       user,
       isAuthenticated: true,
+      isOwnProfile: true,
+      isFollowing: false,
+      originalUrl: req.originalUrl,
     });
   } catch (err) {
     console.error("GET /profile failed:", err);
@@ -48,11 +46,8 @@ router.get("/", authenticateToken, (req, res) => {
   }
 });
 
-/**
- * POST /profile
- */
 router.post("/", authenticateToken, (req, res) => {
-  const { username, bio } = req.body; // removed email
+  const { username, bio } = req.body;
   try {
     db.run("UPDATE users SET username = ?, bio = ? WHERE id = ?", [
       username,
@@ -75,14 +70,14 @@ router.post("/", authenticateToken, (req, res) => {
       title: "Your Profile",
       user: { ...current, username, bio },
       isAuthenticated: true,
+      isOwnProfile: true,
+      isFollowing: false,
+      originalUrl: req.originalUrl,
       error: "Could not update profile. " + (err.message || err),
     });
   }
 });
 
-/**
- * POST /profile/avatar
- */
 router.post("/avatar", authenticateToken, (req, res) => {
   uploadAvatar(req, res, (err) => {
     if (err) {
@@ -90,6 +85,9 @@ router.post("/avatar", authenticateToken, (req, res) => {
         title: "Your Profile",
         user: req.user,
         isAuthenticated: true,
+        isOwnProfile: true,
+        isFollowing: false,
+        originalUrl: req.originalUrl,
         error: err.message || String(err),
       });
     }
@@ -98,6 +96,9 @@ router.post("/avatar", authenticateToken, (req, res) => {
         title: "Your Profile",
         user: req.user,
         isAuthenticated: true,
+        isOwnProfile: true,
+        isFollowing: false,
+        originalUrl: req.originalUrl,
         error: "No file uploaded.",
       });
     }
@@ -114,10 +115,55 @@ router.post("/avatar", authenticateToken, (req, res) => {
         title: "Your Profile",
         user: req.user,
         isAuthenticated: true,
+        isOwnProfile: true,
+        isFollowing: false,
+        originalUrl: req.originalUrl,
         error: "Failed to save avatar.",
       });
     }
   });
+});
+
+router.get("/:id", authenticateToken, (req, res) => {
+  const userId = parseInt(req.params.id, 10);
+
+  try {
+    const profileUser = db
+      .prepare(
+        "SELECT id, username, email, bio, avatar_url FROM users WHERE id = ?"
+      )
+      .get(userId);
+
+    if (!profileUser) {
+      return res
+        .status(404)
+        .render("error", { message: "User not found", error: {} });
+    }
+
+    if (profileUser.id === req.user.id) {
+      return res.redirect("/profile");
+    }
+
+    const follow = db
+      .prepare(
+        "SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ?"
+      )
+      .get(req.user.id, userId);
+
+    res.render("profile", {
+      title: profileUser.username + "'s Profile",
+      user: profileUser,
+      isAuthenticated: true,
+      isOwnProfile: false,
+      isFollowing: !!follow,
+      originalUrl: req.originalUrl,
+    });
+  } catch (err) {
+    console.error("GET /profile/:id failed:", err);
+    res
+      .status(500)
+      .render("error", { message: "Failed to load profile", error: {} });
+  }
 });
 
 module.exports = router;

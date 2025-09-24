@@ -15,6 +15,7 @@ const authRouter = require("./routes/auth");
 const adminRouter = require("./routes/admin");
 const blogRouter = require("./routes/blog");
 const profileRouter = require("./routes/profile");
+const followRouter = require("./routes/follow");
 
 const app = express();
 
@@ -25,7 +26,7 @@ app.set("view engine", "ejs");
 // Core middleware (order matters)
 app.use(logger("dev"));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Layouts
@@ -91,6 +92,7 @@ app.use("/", authRouter);
 app.use("/admin", adminRouter);
 app.use("/profile", profileRouter);
 app.use("/blog", blogRouter);
+app.use("/users", followRouter);
 
 // 404
 app.use(function (req, res, next) {
