@@ -12,6 +12,7 @@
         <header class="mb-4">
           <div class="flex flex-row items-center">
             <h1 class="text-3xl font-bold mb-2 flex-grow"><%= post.header %></h1>
+            <!-- Report -->
             <% if (!post.is_flagged){ %>
             <form action="/blog/posts/<%= post.id %>/flag" method="POST">
               <button
@@ -50,6 +51,7 @@
               </svg>
             </div>
             <% } %>
+            <!-- End Report -->
           </div>
           <div class="text-sm text-gray-500">
             By <span class="font-medium"><%= post.username %></span>
@@ -64,9 +66,12 @@
         </section>
 
         <!-- Like -->
-
         <% if (!likedByUser){ %>
-        <form action="/blog/posts/<%= post.id %>/like" method="POST" class="pt-6">
+        <form
+          action="/blog/posts/<%= post.id %>/like"
+          method="POST"
+          class="pt-6 gap-3 flex flex-row items-center"
+        >
           <button
             type="submit"
             name="id"
@@ -86,16 +91,21 @@
                 clip-rule="evenodd"
               />
             </svg>
-            <span class="mx-1">Like</span><span class="text-gray-500">(<%= likesCount %> likes)</span>
+            <span class="mx-1">Like</span>
           </button>
+          <span class="text-gray-500 text-sm">(<%= likesCount %> likes)</span>
         </form>
         <% } else {%>
-        <form action="/blog/posts/<%= post.id %>/like" method="POST" class="pt-6">
+        <form
+          action="/blog/posts/<%= post.id %>/like"
+          method="POST"
+          class="pt-6 flex flex-row gap-3 items-center"
+        >
           <button
             type="submit"
             name="id"
             value="<%= post.id %>"
-            class="py-1 px-3 flex items-center border rounded text-purple-700 hover:text-purple-700 border-gray-300 hover:border-purple-300 bg-purple-50"
+            class="py-1 px-3 flex items-center border rounded text-purple-700 hover:text-purple-700 border-transparent hover:border-purple-300 hover:bg-purple-50"
           >
             <svg
               class="shrink-0 inline w-4 h-4"
@@ -110,15 +120,18 @@
                 clip-rule="evenodd"
               />
             </svg>
-            <span class="mx-1">Liked</span><span class="text-gray-500">(<%= likesCount %> likes)</span>
+            <span class="mx-1">Like</span>
           </button>
+          <span class="text-gray-500 text-sm">(<%= likesCount %> likes)</span>
         </form>
         <%}%>
+        <!-- End Like -->
 
         <!-- Comments -->
-
         <div class="text-sm rounded-lg bg-gray-50 p-6 shadow mt-6 mb-3">
           <p class="text-lg font-medium pb-3">Comments</p>
+
+          <!-- Comment input field when logged in -->
           <% if (user) { %>
           <div class="bg-purple-50 rounded text-black">
             <form class="p-4 flex flex-row gap-4" action="./<%= post.id %>/comment" method="POST">
@@ -137,8 +150,10 @@
               </button>
             </form>
           </div>
-          <% } %> <% comments.forEach(comment => { %>
+          <% } %>
+          <!-- End Comment input field -->
 
+          <% comments.forEach(comment => { %>
           <div class="text-gray-500 pt-2">
             <div class="border rounded border-gray-200 w-full flex flex-col p-1 bg-white">
               <div class="flex flex-row gap-2 w-full px-1">
@@ -157,7 +172,6 @@
                         clip-rule="evenodd"
                       />
                     </svg>
-
                     <span class="hover:underline"><%= comment.username %></span></a
                   >
                 </p>
@@ -206,6 +220,7 @@
           </div>
           <% }); %>
         </div>
+        <!-- End Comments -->
       </article>
 
       <div class="mt-6">

@@ -21,7 +21,7 @@ function getPostById(req, res) {
   const post = db
     .prepare(
       `
-    SELECT p.id, p.header, p.content, p.created_at, p.hero_image, u.username
+    SELECT p.id, p.header, p.content, p.created_at, p.hero_image, p.is_flagged, u.username
     FROM posts p
     JOIN users u ON u.id = p.user_id
     WHERE p.id = ?
