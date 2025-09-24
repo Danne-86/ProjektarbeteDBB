@@ -18,12 +18,8 @@ function requireLoginRedirect(req, res, next) {
 }
 
 // Blog -> feed (public)
-router.get("/", (req, res) => {
-  if (req.session && req.session.user) {
-    req.user = req.session.user;
-    return blogController.getMyPosts(req, res);
-  }
-  return blogController.getFeed(req, res);
+router.get("/feed", (req, res) => {
+  blogController.getFeed(req, res);
 });
 
 // /blog/new -> post page (requires login)
@@ -36,11 +32,10 @@ router.get("/new", requireLoginRedirect, (req, res) => {
 });
 
 router.post(
-  "/",
+  "/new",
   requireLoginRedirect,
   uploadPostImage.single("image"),
   blogController.createPost
 );
-router.get("/:id", blogController.getPostById); 
 
 module.exports = router;

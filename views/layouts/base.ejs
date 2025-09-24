@@ -29,7 +29,7 @@
         class="mx-auto overflow-hidden max-w-7xl px-4 sm:px-6 max-h-20 lg:px-8 py-3 flex items-center justify-between gap-4 max-h-40"
       >
         <a href="/" class="inline-flex items-center">
-          <img src="logos/InkFlow_logo.jpg" alt="InkFlow" class="select-none" />
+          <img src="/logos/InkFlow_logo.jpg" alt="InkFlow" class="select-none" />
           <span class="sr-only">Back to homepage</span>
         </a>
 
@@ -72,7 +72,7 @@
             </ul>
             <ul class="flex items-center space-x-8">
               <% if (_isAuth) { %>
-              <li><a href="/" class="text-gray-700 hover:text-gray-900">New post</a></li>
+              <li><a href="/blog/new" class="text-gray-700 hover:text-gray-900">New post</a></li>
               <li><a href="/profile" class="text-gray-700 hover:text-gray-900">Profile options</a></li>
               <li><a href="/" class="text-gray-700 hover:text-gray-900">Follower options</a></li>
               <li><a href="/logout" class="text-gray-700 hover:text-gray-900">Logout</a></li>
@@ -114,7 +114,7 @@
         <ul class="py-2">
           <li><a href="/" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">Home</a></li>
           <% if (_isAuth) { %>
-          <li><a href="/" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">New post</a></li>
+          <li><a href="/blog/new" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">New post</a></li>
           <li>
             <a href="/profile" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">Profile options</a>
           </li>
@@ -275,7 +275,7 @@
           <a href="/" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50">Home</a>
 
           <% if (typeof isAuthenticated !== 'undefined' && isAuthenticated) { %>
-          <a href="/" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50">New post</a>
+          <a href="/blog/new" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50">New post</a>
           <a href="/profile" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50"
             >Profile options</a
           >
