@@ -96,11 +96,51 @@ app.use((req, res, next) => {
 // Static assets
 app.use(express.static(path.join(__dirname, "public")));
 
+// Remember previous HTML page URL for GET requests and expose it to views
+app.use((req, res, next) => {
+  const isGet = req.method === "GET";
+  const acceptsHtml = (req.headers.accept || "").includes("text/html");
+
+  // Skip static and assets to avoid polluting prev/current
+  const isStatic =
+    req.path.startsWith("/assets") ||
+    req.path.startsWith("/logos") ||
+    req.path.startsWith("/avatars") ||
+    req.path.startsWith("/posts/") || // images you upload
+    req.path.startsWith("/javascripts") ||
+    req.path.startsWith("/stylesheets") ||
+    req.path.startsWith("/img") ||
+    req.path === "/favicon.ico";
+
+  if (isGet && acceptsHtml && !isStatic) {
+    const prev = req.session.currentUrl || null;
+    req.session.prevUrl = prev;
+    req.session.currentUrl = req.originalUrl;
+
+    res.locals.prevUrl = prev;
+    res.locals.currentUrl = req.originalUrl;
+
+    // Fallback via same-origin Referer (first page, direct open, etc.)
+    if (!res.locals.prevUrl) {
+      const ref = req.get("referer");
+      try {
+        if (ref) {
+          const u = new URL(ref, `${req.protocol}://${req.get("host")}`);
+          if (u.host === req.get("host")) {
+            res.locals.prevUrl = u.pathname + (u.search || "");
+          }
+        }
+      } catch (_) {}
+    }
+  }
+  next();
+});
+
 // Routers
 
-app.use("/u", authorRouter);
 app.use("/", feedRouter);
 app.use("/blog", blogRouter);
+app.use("/u", authorRouter);
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/", authRouter);
