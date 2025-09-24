@@ -9,6 +9,7 @@ const expressLayouts = require("express-ejs-layouts");
 const jwt = require("jsonwebtoken");
 const { SECRET } = require("./utils/authToken");
 
+const authorRouter = require("./routes/author");
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const authRouter = require("./routes/auth");
@@ -97,6 +98,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Routers
 
+app.use("/u", authorRouter);
 app.use("/feed", feedRouter);
 app.use("/blog", blogRouter);
 app.use("/", indexRouter);

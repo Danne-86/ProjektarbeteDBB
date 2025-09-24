@@ -22,27 +22,7 @@ function getFeed(req, res) {
   res.render("feed", { title: "All posts", posts: mapExcerpt(posts) });
 }
 
-// PRIVATE: GET /blog - user's posts
-function getMyPosts(req, res) {
-  const userId = req.user?.id;
-  if (!userId) return res.redirect("/feed");
-
-  const posts = db.all(
-    `
-    SELECT p.id, p.header, p.content, p.created_at, p.hero_image, u.username
-    FROM posts p
-    JOIN users u ON u.id = p.user_id
-    WHERE p.user_id = ?
-    ORDER BY p.created_at DESC
-  `,
-    [userId]
-  );
-
-  res.render("feed", { title: "My posts", posts: mapExcerpt(posts) });
-}
-
-
-// PUBLIC: GET /feed/:id - single post by ID
+// PUBLIC: GET /posts/:id - single post by ID
 function getPostById(req, res) {
   const { id } = req.params;
 
@@ -63,8 +43,59 @@ function getPostById(req, res) {
   res.render("post", { title: post.header, post });
 }
 
+// PRIVATE: GET /blog - user's posts
+function getMyPosts(req, res) {
+  const userId = req.user?.id;
+  if (!userId) return res.redirect("/feed");
 
-// PRIVATE: POST /blog - create new post
+  const posts = db.all(
+    `
+    SELECT p.id, p.header, p.content, p.created_at, p.hero_image, u.username
+    FROM posts p
+    JOIN users u ON u.id = p.user_id
+    WHERE p.user_id = ?
+    ORDER BY p.created_at DESC
+  `,
+    [userId]
+  );
+
+  res.render("feed", { title: "My posts", posts: mapExcerpt(posts) });
+}
+
+// PUBLIC: GET /u/:username - all posts by username
+function getPostsByUsername(req, res) {
+  const { username } = req.params;
+
+  const user = db.get(
+    `SELECT id, username, avatar_url, created_at FROM users WHERE username = ?`,
+    [username]
+  );
+
+  if (!user) {
+    return res.status(404).render("error", { message: "User not found" });
+  }
+
+  const posts = db.all(
+    `
+    SELECT p.id, p.header, p.content, p.created_at, p.hero_image
+    FROM posts p
+    WHERE p.user_id = ?
+    ORDER BY p.created_at DESC
+    `,
+    [user.id]
+  );
+
+  // Add username to each post for rendering
+  const mapped = mapExcerpt(posts).map(p => ({ ...p, username: user.username }));
+
+  // Back to feed if no posts
+  return res.render("feed", {
+    title: `Posts by ${user.username}`,
+    posts: mapped
+  });
+}
+
+// PRIVATE: POST /blog/new - create new post
 function createPost(req, res) {
   try {
     // Guard: must be logged in
@@ -131,4 +162,5 @@ module.exports = {
   getPostById,  // GET /feed/:id
   getMyPosts,   // used when you want to show only the logged-in user's posts
   createPost,   // POST /blog (or /blog/new) via your router
+  getPostsByUsername, // GET /u/:username (public)
 };
