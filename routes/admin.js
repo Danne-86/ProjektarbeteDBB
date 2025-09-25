@@ -2,13 +2,9 @@ const express = require("express");
 const router = express.Router();
 
 const db = require("../db");
+const { ensureAdmin } = require("../middleware/auth");
 
-router.use((req, res, next) => {
-  if (!req.session.user || !req.session.user.is_admin) {
-    return res.status(403).send("Forbidden: Admins only");
-  }
-  next();
-});
+router.use(ensureAdmin);
 
 router.get("/", (req, res, next) => {
   const posts = db
