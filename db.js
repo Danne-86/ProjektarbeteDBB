@@ -31,7 +31,7 @@ db.exec(`
     is_flagged BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME,
-    FOREIGN KEY(user_id) REFERENCES users(id)
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
   )
         `);
 db.exec(`
@@ -43,7 +43,7 @@ db.exec(`
     is_flagged BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME,
-    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE
   )
     `);
@@ -52,8 +52,8 @@ db.exec(`
       user_id INTEGER NOT NULL,
       post_id INTEGER NOT NULL,
       PRIMARY KEY (user_id, post_id),
-      FOREIGN KEY(user_id) REFERENCES users(id),
-      FOREIGN KEY(post_id) REFERENCES posts(id)
+      FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE
       )
       `);
 

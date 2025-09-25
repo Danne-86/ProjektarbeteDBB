@@ -245,7 +245,7 @@ function flagComment(req, res) {
     });
   }
   db.prepare(`UPDATE comments SET is_flagged = 1 WHERE id = ?`).run(commentId);
-  res.redirect(`/posts/${postId}`);
+  res.redirect(`/posts/${req.params.postId}`);
 }
 
 function likePost(req, res) {
