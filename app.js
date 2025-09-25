@@ -8,10 +8,11 @@ const expressLayouts = require("express-ejs-layouts");
 const jwt = require("jsonwebtoken");
 const { SECRET } = require("./utils/authToken");
 
+const authorRouter = require("./routes/author");
 const indexRouter = require("./routes/index");
-const usersRouter = require("./routes/users");
 const authRouter = require("./routes/auth");
 const adminRouter = require("./routes/admin");
+const feedRouter = require("./routes/feed");
 const blogRouter = require("./routes/blog");
 const profileRouter = require("./routes/profile");
 const followRouter = require("./routes/follow");
@@ -62,6 +63,16 @@ app.use((req, res, next) => {
   if (typeof res.locals.errors === "undefined") res.locals.errors = null;
   if (typeof res.locals.values === "undefined") res.locals.values = {};
 
+  // Flash messages (one-time)
+  if (req.session && req.session.successMessage) {
+    res.locals.successMessage = req.session.successMessage;
+    delete req.session.successMessage;
+  }
+  if (req.session && req.session.errorMessage) {
+    res.locals.errorMessage = req.session.errorMessage;
+    delete req.session.errorMessage;
+  }
+
   next();
 });
 
@@ -83,15 +94,54 @@ app.use((req, res, next) => {
 // Static assets
 app.use(express.static(path.join(__dirname, "public")));
 
+// Remember previous HTML page URL for GET requests and expose it to views
+app.use((req, res, next) => {
+  const isGet = req.method === "GET";
+  const acceptsHtml = (req.headers.accept || "").includes("text/html");
+
+  // Skip static and assets to avoid polluting prev/current
+  const isStatic =
+    req.path.startsWith("/assets") ||
+    req.path.startsWith("/logos") ||
+    req.path.startsWith("/avatars") ||
+    req.path.startsWith("/stylesheets") ||
+    req.path.startsWith("/img") ||
+    req.path === "/favicon.ico";
+
+  if (isGet && acceptsHtml && !isStatic) {
+    const prev = req.session.currentUrl || null;
+    req.session.prevUrl = prev;
+    req.session.currentUrl = req.originalUrl;
+
+    res.locals.prevUrl = prev;
+    res.locals.currentUrl = req.originalUrl;
+
+    // Fallback via same-origin Referer (first page, direct open, etc.)
+    if (!res.locals.prevUrl) {
+      const ref = req.get("referer");
+      try {
+        if (ref) {
+          const u = new URL(ref, `${req.protocol}://${req.get("host")}`);
+          if (u.host === req.get("host")) {
+            res.locals.prevUrl = u.pathname + (u.search || "");
+          }
+        }
+      } catch (_) {}
+    }
+  }
+  next();
+});
+
 // Routers
 
+app.use("/", feedRouter);
+app.use("/blog", blogRouter);
+app.use("/u", authorRouter);
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
+app.use("/users", followRouter);
 app.use("/", authRouter);
 app.use("/admin", adminRouter);
 app.use("/profile", profileRouter);
-app.use("/blog", blogRouter);
-app.use("/users", followRouter);
 
 // 404
 app.use(function (req, res, next) {

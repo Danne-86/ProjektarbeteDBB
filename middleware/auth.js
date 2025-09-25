@@ -4,6 +4,7 @@ exports.authenticateToken = (req, res, next) => {
     req.user = user;
     return next();
   }
+  // Rendera login on html request
   if (req.accepts("html")) {
     return res.status(401).render("login", {
       title: "Login",
@@ -12,6 +13,7 @@ exports.authenticateToken = (req, res, next) => {
       values: {},
     });
   }
+  // Fallback for API
   return res.status(401).json({ error: "Not authenticated" });
 };
 
@@ -24,7 +26,9 @@ exports.ensureAdmin = (req, res, next) => {
     return next();
   }
   if (req.accepts("html")) {
-    return res.status(403).render("error", { message: "Forbidden" });
+    return res
+      .status(403)
+      .render("error", { error: "Forbidden", message: "Forbidden" });
   }
   return res.status(403).json({ error: "Forbidden" });
 };

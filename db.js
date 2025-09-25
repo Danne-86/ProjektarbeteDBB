@@ -46,7 +46,7 @@ db.exec(`
     is_flagged BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME,
-    FOREIGN KEY(user_id) REFERENCES users(id)
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
   )
         `);
 db.exec(`
@@ -58,17 +58,25 @@ db.exec(`
     is_flagged BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME,
-    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE
   )
     `);
+db.exec(`
+      CREATE TABLE IF NOT EXISTS likes (
+      user_id INTEGER NOT NULL,
+      post_id INTEGER NOT NULL,
+      PRIMARY KEY (user_id, post_id),
+      FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE
+      )
+      `);
 
 try {
   const cols = db.prepare(`PRAGMA table_info(posts)`).all();
   const hasHero = cols.some((c) => c.name === "hero_image");
   if (!hasHero) {
     db.exec(`ALTER TABLE posts ADD COLUMN hero_image TEXT`);
-    console.log("[DB] Added posts.hero_image column");
   }
 } catch (e) {
   console.error("[DB] Failed to ensure posts.hero_image:", e);
