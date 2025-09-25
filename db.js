@@ -62,7 +62,6 @@ try {
   const hasHero = cols.some((c) => c.name === "hero_image");
   if (!hasHero) {
     db.exec(`ALTER TABLE posts ADD COLUMN hero_image TEXT`);
-    console.log("[DB] Added posts.hero_image column");
   }
 } catch (e) {
   console.error("[DB] Failed to ensure posts.hero_image:", e);

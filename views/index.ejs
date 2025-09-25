@@ -1,17 +1,97 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title><%= title %></title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body class="bg-gray-50 min-h-screen">
 
-    <main class="mx-auto max-w-7xl p-6 lg:pl-48 lg:pr-48">
-      <h1 class="text-2xl font-bold mb-2"><%= title %></h1>
-      <p class="text-gray-700">Welcome to <%= title %></p>
-    </main>
-  </body>
+<head>
+  <title>
+    <%= title %>
+  </title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const track = document.querySelector(".carousel-track");
+      const prevButton = document.querySelector(".prev");
+      const nextButton = document.querySelector(".next");
+
+      const itemWidth = document.querySelector(".carousel-item").offsetWidth;
+      const scrollAmount = itemWidth * 1;
+
+      nextButton.addEventListener("click", () => {
+        track.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      });
+
+      prevButton.addEventListener("click", () => {
+        track.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+      });
+    });
+  </script>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+
+  <main class="mx-auto max-w-7xl p-6">
+    <div class="grid grid-cols-7 gap-4">
+      <div class="col-start-1 col-end-8 text-center">
+        <h2 class="text-2xl lg:text-5xl italic mb-7">Placeholder subheader</h2>
+        <h1 class="text-3xl lg:text-7xl font-bold mb-7">
+          Placeholder header
+        </h1>
+      </div>
+      <div class="flex flex-col max-w-[400px] mx-auto col-start-1 col-end-8 text-center gap-10 lg:max-w-full lg:flex-row">
+        <ul class="text-gray-700 border-2 border-solid">
+          <li>✓ Share your thoughts instantly - no tech skills required.</li>
+          <li>✓ A welcoming community with active moderation.</li>
+          <li>✓ Quick tools to publish posts and updates on the go.</li>
+          <li>✓ Easy sharing of your posts to other social media platforms.</li>
+          <li>✓ A clean, distraction-free writing experience.</li>
+        </ul>
+        <ul class="text-gray-700 border-2 border-solid">
+          <li>✘ No spam or unwanted ads cluttering your feed.</li>
+          <li>✘ No hate speech, bullying or harassment.</li>
+          <li>✘ No endless technical setups or complex tools.</li>
+          <li>✘ No misleading or harmful content.</li>
+          <li>✘ No data misuse - your privacy is respected.</li>
+        </ul>
+      </div>
+      <div class="col-span-8">
+        <% if (typeof isAuthenticated !=='undefined' && isAuthenticated) { %>
+          <h3 class="italic text-xl text-center">Check out some of the popular posts</h3>
+          <% } else { %>
+            <div class="flex justify-center gap-1">
+              <a href="#" data-modal-open="login"
+                class="inline-flex items-center justify-center rounded-md px-5 py-2.5 bg-purple-700 text-white hover:bg-purple-800 shadow-sm">
+                Login
+              </a>
+              <a href="#" data-modal-open="register"
+                class="inline-flex items-center justify-center rounded-md px-5 py-2 border-2 border-purple-700 text-purple-700 hover:bg-purple-50">
+                Register
+              </a>
+            </div>
+            <% } %>
+      </div>
+    </div>
+    <!--Section visas om det finns 1 eller fler posts knapparna kommer bara vara ett problem om där är mindre än 4 posts-->
+    <% if (posts.length> 0) { %>
+      <section>
+        <div class="flex items-center justify-center gap-2">
+          <button class="carousel-button prev">&lt;</button>
+          <div class="carousel-container">
+            <div class="carousel-track mt-5 text-wrap overflow-hidden">
+              <% const now=new Date(); const visiblePosts=posts.sort(()=> 0.5 - Math.random()).slice(0, 5);
+
+                visiblePosts.forEach(post => {
+                %>
+                <%- include('partials/carouselCard', { post }) %>
+                  <% }) %>
+            </div>
+          </div>
+          <button class="carousel-button next">&gt;</button>
+        </div>
+      </section>
+      <% } %>
+  </main>
+
+</body>
+
 </html>

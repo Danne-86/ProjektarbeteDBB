@@ -14,7 +14,7 @@
             <h1 class="text-3xl font-bold mb-2 flex-grow"><%= post.header %></h1>
             <!-- Report -->
             <% if (!post.is_flagged){ %>
-            <form action="/blog/posts/<%= post.id %>/flag" method="POST">
+            <form action="/posts/<%= post.id %>/flag" method="POST">
               <button
                 type="submit"
                 name="id"
@@ -54,7 +54,12 @@
             <!-- End Report -->
           </div>
           <div class="text-sm text-gray-500">
-            By <span class="font-medium"><%= post.username %></span>
+            By
+            <a
+              href="/u/<%= encodeURIComponent(post.username) %>"
+              class="font-medium text-indigo-700 hover:underline"
+              >@<%= post.username %></a
+            >
             · <%= new Date(post.created_at).toLocaleString() %>
           </div>
         </header>
@@ -67,11 +72,7 @@
 
         <!-- Like -->
         <% if (!likedByUser){ %>
-        <form
-          action="/blog/posts/<%= post.id %>/like"
-          method="POST"
-          class="pt-6 gap-3 flex flex-row items-center"
-        >
+        <form action="/posts/<%= post.id %>/like" method="POST" class="pt-6 gap-3 flex flex-row items-center">
           <button
             type="submit"
             name="id"
@@ -96,11 +97,7 @@
           <span class="text-gray-500 text-sm">(<%= likesCount %> likes)</span>
         </form>
         <% } else {%>
-        <form
-          action="/blog/posts/<%= post.id %>/like"
-          method="POST"
-          class="pt-6 flex flex-row gap-3 items-center"
-        >
+        <form action="/posts/<%= post.id %>/like" method="POST" class="pt-6 flex flex-row gap-3 items-center">
           <button
             type="submit"
             name="id"
@@ -134,7 +131,7 @@
           <!-- Comment input field when logged in -->
           <% if (user) { %>
           <div class="bg-purple-50 rounded text-black">
-            <form class="p-4 flex flex-row gap-4" action="./<%= post.id %>/comment" method="POST">
+            <form class="p-4 flex flex-row gap-4" action="/posts/<%= post.id %>/comment" method="POST">
               <input
                 type="text"
                 name="comment"
@@ -158,7 +155,7 @@
             <div class="border rounded border-gray-200 w-full flex flex-col p-1 bg-white">
               <div class="flex flex-row gap-2 w-full px-1">
                 <p class="font-medium">
-                  <a href="/blog/<%= comment.user_id %>">
+                  <a href="/u/<%= comment.username %>">
                     <svg
                       class="shrink-0 inline w-4 h-4"
                       aria-hidden="true"
@@ -179,7 +176,7 @@
                 <p class="flex-grow"><%= comment.created_at %></p>
 
                 <% if (!comment.is_flagged){ %>
-                <form action="/blog/posts/<%= post.id %>/<%= comment.id %>/flag" method="POST">
+                <form action="/posts/<%= post.id %>/<%= comment.id %>/flag" method="POST">
                   <button
                     type="submit"
                     name="id"
@@ -224,7 +221,10 @@
       </article>
 
       <div class="mt-6">
-        <a href="/feed" class="text-indigo-600 hover:underline">&larr; Back to feed</a>
+        <% const _prev = (typeof prevUrl !== 'undefined') ? prevUrl : null; const _curr = (typeof currentUrl
+        !== 'undefined') ? currentUrl : null; // Avoid going back to same page or undefined const backUrl =
+        (_prev && _prev !== _curr) ? _prev : '/feed'; %>
+        <a href="<%= prevUrl %>" class="text-indigo-600 hover:underline"> &larr; Back </a>
       </div>
     </main>
   </body>
