@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
 </head>
 <body class="bg-gray-50 min-h-screen">
   <main class="container mx-auto px-4 py-8 max-w-3xl">
@@ -12,7 +13,7 @@
       <header class="mb-4">
         <h1 class="text-3xl font-bold mb-2"><%= post.header %></h1>
         <div class="text-sm text-gray-500">
-          By <span class="font-medium"><%= post.username %></span>
+          By <a href="/u/<%= encodeURIComponent(post.username) %>" class="font-medium text-indigo-700 hover:underline">@<%= post.username %></a>
           · <%= new Date(post.created_at).toLocaleString() %>
         </div>
       </header>
@@ -25,7 +26,15 @@
     </article>
 
     <div class="mt-6">
-      <a href="/feed" class="text-indigo-600 hover:underline">&larr; Back to feed</a>
+      <% 
+        const _prev = (typeof prevUrl !== 'undefined') ? prevUrl : null;
+        const _curr = (typeof currentUrl !== 'undefined') ? currentUrl : null;
+        // Avoid going back to same page or undefined
+        const backUrl = (_prev && _prev !== _curr) ? _prev : '/feed';
+      %>
+      <a href="<%= backUrl %>" class="text-indigo-600 hover:underline">
+        &larr; Back
+      </a>
     </div>
   </main>
 </body>
