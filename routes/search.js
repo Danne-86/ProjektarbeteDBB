@@ -5,12 +5,20 @@ const db = require('better-sqlite3')('database.db', {
 
 });
 
+function mapExcerpt(rows) {
+  return rows.map((p) => ({
+    ...p,
+    excerpt:
+      (p.content || "").slice(0, 220) +
+      ((p.content || "").length > 220 ? "…" : ""),
+  }));
+}
 
 router.get('/', function (req, res, next) {
 
     const { content } = req.query;
 
-    let sql = 'SELECT * FROM posts';
+    let sql = 'SELECT p.id, p.header, p.content, p.created_at, p.hero_image, u.username FROM posts p JOIN users u ON u.id = p.user_id';
     let params = [];
 
     if (content) {
@@ -22,7 +30,7 @@ router.get('/', function (req, res, next) {
 
     res.render('search', {
         title: 'Search',
-        posts: posts
+        posts: mapExcerpt(posts)
     });
 });
 
