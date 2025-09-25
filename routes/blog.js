@@ -28,11 +28,6 @@ router.get("/new", requireLoginRedirect, (req, res) => {
   });
 });
 
-router.post(
-  "/new",
-  requireLoginRedirect,
-  uploadPostImage.single("image"),
-  blogController.createPost
-);
+router.post("/new", requireLoginRedirect, uploadPostImage.single("image"), blogController.createPost);
 
 module.exports = router;

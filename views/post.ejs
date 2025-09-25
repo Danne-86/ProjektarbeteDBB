@@ -1,41 +1,231 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= title %></title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel='stylesheet' href='/stylesheets/style.css' />
-</head>
-<body class="bg-gray-50 min-h-screen">
-  <main class="container mx-auto px-4 py-8 max-w-3xl">
-    <article class="bg-white rounded-xl shadow p-6">
-      <header class="mb-4">
-        <h1 class="text-3xl font-bold mb-2"><%= post.header %></h1>
-        <div class="text-sm text-gray-500">
-          By <a href="/u/<%= encodeURIComponent(post.username) %>" class="font-medium text-indigo-700 hover:underline">@<%= post.username %></a>
-          · <%= new Date(post.created_at).toLocaleString() %>
-        </div>
-      </header>
-      <section class="prose max-w-none">
-        <% if (post.hero_image) { %>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <main class="container mx-auto px-4 py-8 max-w-3xl">
+      <article class="bg-white rounded-xl shadow p-6">
+        <header class="mb-4">
+          <div class="flex flex-row items-center">
+            <h1 class="text-3xl font-bold mb-2 flex-grow"><%= post.header %></h1>
+            <!-- Report -->
+            <% if (!post.is_flagged){ %>
+            <form action="/posts/<%= post.id %>/flag" method="POST">
+              <button
+                type="submit"
+                name="id"
+                value="<%= post.id %>"
+                class="py-1 px-3 flex items-center border rounded text-gray-500 hover:text-red-800 border-gray-300 hover:border-red-300 hover:bg-red-50"
+              >
+                <span class="mr-1 text-xs">Report</span>
+                <svg
+                  class="shrink-0 inline w-4 h-4"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"
+                  />
+                </svg>
+              </button>
+            </form>
+            <% } else {%>
+            <div class="py-1 px-3 flex items-center border rounded text-red-800 border-red-800">
+              <span class="mr-1 text-xs">Reported</span>
+              <svg
+                class="shrink-0 inline w-4 h-4"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"
+                />
+              </svg>
+            </div>
+            <% } %>
+            <!-- End Report -->
+          </div>
+          <div class="text-sm text-gray-500">
+            By
+            <a
+              href="/u/<%= encodeURIComponent(post.username) %>"
+              class="font-medium text-indigo-700 hover:underline"
+              >@<%= post.username %></a
+            >
+            · <%= new Date(post.created_at).toLocaleString() %>
+          </div>
+        </header>
+        <section class="prose max-w-none">
+          <% if (post.hero_image) { %>
           <img src="<%= post.hero_image %>" alt="Post image" class="w-full rounded-lg mb-4" />
-        <% } %>
-        <div class="whitespace-pre-wrap"><%= post.content %></div>
-      </section>
-    </article>
+          <% } %>
+          <div class="whitespace-pre-wrap"><%= post.content %></div>
+        </section>
 
-    <div class="mt-6">
-      <% 
-        const _prev = (typeof prevUrl !== 'undefined') ? prevUrl : null;
-        const _curr = (typeof currentUrl !== 'undefined') ? currentUrl : null;
-        // Avoid going back to same page or undefined
-        const backUrl = (_prev && _prev !== _curr) ? _prev : '/feed';
-      %>
-      <a href="<%= backUrl %>" class="text-indigo-600 hover:underline">
-        &larr; Back
-      </a>
-    </div>
-  </main>
-</body>
+        <!-- Like -->
+        <% if (!likedByUser){ %>
+        <form action="/posts/<%= post.id %>/like" method="POST" class="pt-6 gap-3 flex flex-row items-center">
+          <button
+            type="submit"
+            name="id"
+            value="<%= post.id %>"
+            class="py-1 px-3 flex items-center border rounded text-gray-500 hover:text-purple-700 border-gray-300 hover:border-purple-300 hover:bg-purple-50"
+          >
+            <svg
+              class="shrink-0 inline w-4 h-4"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M15.03 9.684h3.965c.322 0 .64.08.925.232.286.153.532.374.717.645a2.109 2.109 0 0 1 .242 1.883l-2.36 7.201c-.288.814-.48 1.355-1.884 1.355-2.072 0-4.276-.677-6.157-1.256-.472-.145-.924-.284-1.348-.404h-.115V9.478a25.485 25.485 0 0 0 4.238-5.514 1.8 1.8 0 0 1 .901-.83 1.74 1.74 0 0 1 1.21-.048c.396.13.736.397.96.757.225.36.32.788.269 1.211l-1.562 4.63ZM4.177 10H7v8a2 2 0 1 1-4 0v-6.823C3 10.527 3.527 10 4.176 10Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span class="mx-1">Like</span>
+          </button>
+          <span class="text-gray-500 text-sm">(<%= likesCount %> likes)</span>
+        </form>
+        <% } else {%>
+        <form action="/posts/<%= post.id %>/like" method="POST" class="pt-6 flex flex-row gap-3 items-center">
+          <button
+            type="submit"
+            name="id"
+            value="<%= post.id %>"
+            class="py-1 px-3 flex items-center border rounded text-purple-700 hover:text-purple-700 border-transparent hover:border-purple-300 hover:bg-purple-50"
+          >
+            <svg
+              class="shrink-0 inline w-4 h-4"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M15.03 9.684h3.965c.322 0 .64.08.925.232.286.153.532.374.717.645a2.109 2.109 0 0 1 .242 1.883l-2.36 7.201c-.288.814-.48 1.355-1.884 1.355-2.072 0-4.276-.677-6.157-1.256-.472-.145-.924-.284-1.348-.404h-.115V9.478a25.485 25.485 0 0 0 4.238-5.514 1.8 1.8 0 0 1 .901-.83 1.74 1.74 0 0 1 1.21-.048c.396.13.736.397.96.757.225.36.32.788.269 1.211l-1.562 4.63ZM4.177 10H7v8a2 2 0 1 1-4 0v-6.823C3 10.527 3.527 10 4.176 10Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span class="mx-1">Like</span>
+          </button>
+          <span class="text-gray-500 text-sm">(<%= likesCount %> likes)</span>
+        </form>
+        <%}%>
+        <!-- End Like -->
+
+        <!-- Comments -->
+        <div class="text-sm rounded-lg bg-gray-50 p-6 shadow mt-6 mb-3">
+          <p class="text-lg font-medium pb-3">Comments</p>
+
+          <!-- Comment input field when logged in -->
+          <% if (user) { %>
+          <div class="bg-purple-50 rounded text-black">
+            <form class="p-4 flex flex-row gap-4" action="/posts/<%= post.id %>/comment" method="POST">
+              <input
+                type="text"
+                name="comment"
+                class="rounded-md p-2 flex-grow"
+                placeholder="Write a comment..."
+                id="comment"
+              />
+              <button
+                type="submit"
+                class="inline-flex items-center justify-center rounded-md px-5 py-2.5 bg-purple-700 text-white hover:bg-purple-800 shadow-sm"
+              >
+                Send
+              </button>
+            </form>
+          </div>
+          <% } %>
+          <!-- End Comment input field -->
+
+          <% comments.forEach(comment => { %>
+          <div class="text-gray-500 pt-2">
+            <div class="border rounded border-gray-200 w-full flex flex-col p-1 bg-white">
+              <div class="flex flex-row gap-2 w-full px-1">
+                <p class="font-medium">
+                  <a href="/u/<%= comment.username %>">
+                    <svg
+                      class="shrink-0 inline w-4 h-4"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <span class="hover:underline"><%= comment.username %></span></a
+                  >
+                </p>
+
+                <p class="flex-grow"><%= comment.created_at %></p>
+
+                <% if (!comment.is_flagged){ %>
+                <form action="/posts/<%= post.id %>/<%= comment.id %>/flag" method="POST">
+                  <button
+                    type="submit"
+                    name="id"
+                    value="<%= comment.id %>"
+                    class="p-1 flex items-center border rounded text-gray-500 hover:text-red-800 border-transparent hover:border-red-300 hover:bg-red-50"
+                  >
+                    <svg
+                      class="shrink-0 inline w-4 h-4"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"
+                      />
+                    </svg>
+                  </button>
+                </form>
+                <% } else {%>
+                <div class="p-1 flex items-center border text-red-800 border-transparent">
+                  <svg
+                    class="shrink-0 inline w-4 h-4"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"
+                    />
+                  </svg>
+                </div>
+                <%}%>
+              </div>
+              <p class="text-black px-1"><%= comment.content %></p>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+        <!-- End Comments -->
+      </article>
+
+      <div class="mt-6">
+        <% const _prev = (typeof prevUrl !== 'undefined') ? prevUrl : null; const _curr = (typeof currentUrl
+        !== 'undefined') ? currentUrl : null; // Avoid going back to same page or undefined const backUrl =
+        (_prev && _prev !== _curr) ? _prev : '/feed'; %>
+        <a href="<%= prevUrl %>" class="text-indigo-600 hover:underline"> &larr; Back </a>
+      </div>
+    </main>
+  </body>
 </html>
