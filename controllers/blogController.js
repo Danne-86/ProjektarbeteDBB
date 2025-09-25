@@ -4,7 +4,9 @@ const db = require("../db");
 function mapExcerpt(rows) {
   return rows.map((p) => ({
     ...p,
-    excerpt: (p.content || "").slice(0, 220) + ((p.content || "").length > 220 ? "…" : ""),
+    excerpt:
+      (p.content || "").slice(0, 220) +
+      ((p.content || "").length > 220 ? "…" : ""),
   }));
 }
 
@@ -57,9 +59,17 @@ function getPostById(req, res) {
   const likesCount = likes?.count;
   const likedByUser = likes?.by_user;
 
-  if (!post) return res.status(404).render("error", { error: "Post not found" });
+  if (!post)
+    return res.status(404).render("error", { error: "Post not found" });
 
-  res.render("post", { title: post.header, post, comments, user: req.user, likesCount, likedByUser });
+  res.render("post", {
+    title: post.header,
+    post,
+    comments,
+    user: req.user,
+    likesCount,
+    likedByUser,
+  });
 }
 
 // PRIVATE: GET /blog - user's posts
@@ -85,9 +95,10 @@ function getMyPosts(req, res) {
 function getPostsByUsername(req, res) {
   const { username } = req.params;
 
-  const user = db.get(`SELECT id, username, avatar_url, created_at FROM users WHERE username = ?`, [
-    username,
-  ]);
+  const user = db.get(
+    `SELECT id, username, avatar_url, created_at FROM users WHERE username = ?`,
+    [username]
+  );
 
   if (!user) {
     return res.status(404).render("error", { message: "User not found" });
@@ -104,7 +115,10 @@ function getPostsByUsername(req, res) {
   );
 
   // Add username to each post for rendering
-  const mapped = mapExcerpt(posts).map((p) => ({ ...p, username: user.username }));
+  const mapped = mapExcerpt(posts).map((p) => ({
+    ...p,
+    username: user.username,
+  }));
 
   // Back to feed if no posts
   return res.render("feed", {
@@ -135,7 +149,8 @@ function createPost(req, res) {
     if (!title) errors.push("Title is required.");
     if (!content) errors.push("Content is required.");
     if (title.length > 120) errors.push("Title must be ≤ 120 characters.");
-    if (content.length > 20000) errors.push("Content must be ≤ 20,000 characters.");
+    if (content.length > 20000)
+      errors.push("Content must be ≤ 20,000 characters.");
 
     // Optional hero image
     let heroPath = null;
@@ -154,12 +169,10 @@ function createPost(req, res) {
     }
 
     // Persist the post
-    db.run(`INSERT INTO posts (user_id, header, content, hero_image) VALUES (?, ?, ?, ?)`, [
-      req.user.id,
-      title,
-      content,
-      heroPath,
-    ]);
+    db.run(
+      `INSERT INTO posts (user_id, header, content, hero_image) VALUES (?, ?, ?, ?)`,
+      [req.user.id, title, content, heroPath]
+    );
 
     // Flash success and redirect to the public feed
     req.session.successMessage = "Post created successfully!";
@@ -182,7 +195,8 @@ function createComment(req, res) {
     const postId = req.params.id;
 
     const post = db.prepare("SELECT * FROM posts WHERE id = ?").get(postId);
-    if (!post) return res.status(404).render("error", { error: "Post not found" });
+    if (!post)
+      return res.status(404).render("error", { error: "Post not found" });
 
     let errors = [];
 
@@ -201,11 +215,9 @@ function createComment(req, res) {
       });
     }
 
-    db.prepare("INSERT INTO comments (user_id, post_id, content) VALUES (?, ?, ?)").run(
-      user.id,
-      postId,
-      comment
-    );
+    db.prepare(
+      "INSERT INTO comments (user_id, post_id, content) VALUES (?, ?, ?)"
+    ).run(user.id, postId, comment);
 
     res.redirect(`/posts/${postId}`);
   } catch (err) {
@@ -244,7 +256,9 @@ function flagComment(req, res) {
       values: {},
     });
   }
-  db.prepare(`UPDATE comments SET is_flagged = 1 WHERE id = ?`).run(commentId);
+  db.prepare(`UPDATE comments SET is_flagged = 1 WHERE id = ?`).run(
+    req.params.commentId
+  );
   res.redirect(`/posts/${req.params.postId}`);
 }
 
@@ -261,9 +275,13 @@ function likePost(req, res) {
     });
   }
 
-  const result = db.prepare("DELETE FROM likes WHERE user_id = ? AND post_id = ?").run(userId, postId);
+  const result = db
+    .prepare("DELETE FROM likes WHERE user_id = ? AND post_id = ?")
+    .run(userId, postId);
   if (result.changes === 0)
-    db.prepare("INSERT OR IGNORE INTO likes (user_id, post_id) VALUES (?, ?)").run(userId, postId);
+    db.prepare(
+      "INSERT OR IGNORE INTO likes (user_id, post_id) VALUES (?, ?)"
+    ).run(userId, postId);
 
   res.redirect(`/posts/${postId}`);
 }
