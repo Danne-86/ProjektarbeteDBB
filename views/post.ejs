@@ -53,6 +53,29 @@
             </div>
             <% } %>
             <!-- End Report -->
+            <% if (user && authorId && user.id !== authorId) { %>
+              <form
+                action="/users/<%= authorId %>/<%= isFollowing ? 'unfollow' : 'follow' %>"
+                method="POST"
+                class="inline-block ml-2"
+              >
+                <!-- Redirect back to this post after action -->
+                <input
+                  type="hidden"
+                  name="redirect"
+                  value="<%= (typeof currentUrl !== 'undefined' && currentUrl) ? currentUrl : (locals && locals.currentUrl) || ('/posts/' + post.id) %>"
+                />
+                <button
+                  type="submit"
+                  class="px-2 py-1 rounded border
+                        <%= isFollowing
+                              ? 'bg-red-600 text-white hover:bg-red-700 border-red-600'
+                              : 'text-gray-600 hover:text-indigo-600 hover:border-indigo-400' %>"
+                >
+                  <%= isFollowing ? 'Unfollow' : 'Follow' %>
+                </button>
+              </form>
+            <% } %>
           </div>
           <div class="text-sm text-gray-500">
             By
