@@ -15,7 +15,6 @@ const adminRouter = require("./routes/admin");
 const feedRouter = require("./routes/feed");
 const blogRouter = require("./routes/blog");
 const profileRouter = require("./routes/profile");
-const followRouter = require("./routes/follow");
 
 const app = express();
 
@@ -155,7 +154,6 @@ app.use("/", feedRouter);
 app.use("/blog", blogRouter);
 app.use("/u", authorRouter);
 app.use("/", indexRouter);
-app.use("/users", followRouter);
 app.use("/", authRouter);
 app.use("/admin", adminRouter);
 app.use("/profile", profileRouter);

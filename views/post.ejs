@@ -55,7 +55,7 @@
             <!-- End Report -->
             <% if (user && authorId && user.id !== authorId) { %>
               <form
-                action="/users/<%= authorId %>/<%= isFollowing ? 'unfollow' : 'follow' %>"
+                action="/profile/<%= authorId %>/<%= isFollowing ? 'unfollow' : 'follow' %>"
                 method="POST"
                 class="inline-block ml-2"
               >

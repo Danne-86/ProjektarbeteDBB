@@ -37,7 +37,7 @@
         <% } else { %>
           <!-- Other user's profile: Follow/Unfollow (POST for both) -->
           <form
-            action="/users/<%= user.id %>/<%= isFollowing ? 'unfollow' : 'follow' %>"
+            action="/profile/<%= user.id %>/<%= isFollowing ? 'unfollow' : 'follow' %>"
             method="POST"
             class="space-y-2"
           >

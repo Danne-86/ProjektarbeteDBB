@@ -16,6 +16,90 @@ const { uploadAvatar } = require("../middleware/upload");
   }
 })();
 
+router.get("/connections", authenticateToken, (req, res) => {
+  const me = req.user.id;
+
+  const followers = db
+    .prepare(
+      `
+      SELECT u.id, u.username, u.avatar_url, f.created_at
+      FROM follows f
+      JOIN users u ON u.id = f.follower_id
+      WHERE f.following_id = ?
+      ORDER BY f.created_at DESC
+    `
+    )
+    .all(me);
+
+  const following = db
+    .prepare(
+      `
+      SELECT u.id, u.username, u.avatar_url, f.created_at
+      FROM follows f
+      JOIN users u ON u.id = f.following_id
+      WHERE f.follower_id = ?
+      ORDER BY f.created_at DESC
+    `
+    )
+    .all(me);
+
+  const iFollowSet = new Set(following.map((u) => u.id));
+  const mappedFollowers = followers.map((u) => ({
+    ...u,
+    canFollowBack: !iFollowSet.has(u.id),
+  }));
+
+  res.render("connections", {
+    title: "Connections",
+    followers: mappedFollowers,
+    following,
+    currentUrl: (res.locals && res.locals.currentUrl) || "/profile/connections",
+    user: req.user,
+    isAuthenticated: true,
+  });
+});
+
+router.post("/:id/follow", authenticateToken, (req, res) => {
+  const followerId = req.user.id;
+  const followingId = parseInt(req.params.id, 10);
+  const back = req.body.redirect || req.get("referer") || "/profile";
+
+  try {
+    if (followerId === followingId) return res.redirect(back);
+
+    const exists = db
+      .prepare(
+        "SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ?"
+      )
+      .get(followerId, followingId);
+    if (exists) return res.redirect(back);
+
+    db.prepare(
+      "INSERT INTO follows (follower_id, following_id) VALUES (?, ?)"
+    ).run(followerId, followingId);
+    res.redirect(back);
+  } catch (err) {
+    console.error("POST /profile/:id/follow failed:", err);
+    res.redirect(back);
+  }
+});
+
+router.post("/:id/unfollow", authenticateToken, (req, res) => {
+  const followerId = req.user.id;
+  const followingId = parseInt(req.params.id, 10);
+  const back = req.body.redirect || req.get("referer") || "/profile";
+
+  try {
+    db.prepare(
+      "DELETE FROM follows WHERE follower_id = ? AND following_id = ?"
+    ).run(followerId, followingId);
+    res.redirect(back);
+  } catch (err) {
+    console.error("POST /profile/:id/unfollow failed:", err);
+    res.redirect(back);
+  }
+});
+
 router.get("/", authenticateToken, (req, res) => {
   try {
     const user = db
