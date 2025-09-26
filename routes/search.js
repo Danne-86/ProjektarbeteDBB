@@ -8,7 +8,9 @@ const db = require('better-sqlite3')('database.db', {
 function mapExcerpt(rows) {
   return rows.map((p) => ({
     ...p,
-    excerpt: p.content || "",
+    excerpt:
+      (p.content || "").slice(0, 220) +
+      ((p.content || "").length > 220 ? "…" : ""),
   }));
 }
 
