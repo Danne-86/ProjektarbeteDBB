@@ -58,14 +58,15 @@ app.use((req, res, next) => {
   if (res.locals.user && !req.user) req.user = res.locals.user;
 
   // EJS wont crash if these are undefined
-  if (typeof res.locals.successMessage === "undefined") res.locals.successMessage = null;
-  if (typeof res.locals.errorMessage === "undefined") res.locals.errorMessage = null;
+  if (typeof res.locals.successMessage === "undefined")
+    res.locals.successMessage = null;
+  if (typeof res.locals.errorMessage === "undefined")
+    res.locals.errorMessage = null;
   if (typeof res.locals.errors === "undefined") res.locals.errors = null;
   if (typeof res.locals.values === "undefined") res.locals.values = {};
 
-
   // Flash messages (one-time)
-   if (req.session && req.session.successMessage) {
+  if (req.session && req.session.successMessage) {
     res.locals.successMessage = req.session.successMessage;
     delete req.session.successMessage;
   }
@@ -129,6 +130,23 @@ app.use((req, res, next) => {
         }
       } catch (_) {}
     }
+  }
+  next();
+});
+
+const db = require("./db"); // safe: db does NOT import app.js
+app.use((req, res, next) => {
+  const isGetHtml =
+    req.method === "GET" && (req.headers.accept || "").includes("text/html");
+  if (isGetHtml && req.session && req.session.user) {
+    try {
+      const fresh = db
+        .prepare(
+          "SELECT id, username, email, bio, avatar_url, is_admin FROM users WHERE id = ?"
+        )
+        .get(req.session.user.id);
+      if (fresh) req.session.user = fresh;
+    } catch (_) {}
   }
   next();
 });

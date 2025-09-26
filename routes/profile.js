@@ -59,6 +59,14 @@ router.post("/", authenticateToken, (req, res) => {
       bio,
       req.user.id,
     ]);
+    const fresh = db
+      .prepare(
+        "SELECT id, username, email, bio, avatar_url, is_admin FROM users WHERE id = ?"
+      )
+      .get(req.user.id);
+    if (fresh) {
+      req.session.user = fresh;
+    }
     res.redirect("/profile");
   } catch (err) {
     console.error("POST /profile failed:", err);
@@ -107,6 +115,14 @@ router.post("/avatar", authenticateToken, (req, res) => {
         avatarPath,
         req.user.id,
       ]);
+      const fresh = db
+        .prepare(
+          "SELECT id, username, email, bio, avatar_url, is_admin FROM users WHERE id = ?"
+        )
+        .get(req.user.id);
+      if (fresh) {
+        req.session.user = fresh;
+      }
       res.redirect("/profile");
     } catch (e) {
       console.error("Saving avatar failed:", e);
