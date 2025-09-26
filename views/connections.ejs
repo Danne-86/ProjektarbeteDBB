@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="mx-auto max-w-5xl">
+    <h1 class="text-2xl font-semibold mb-6">Your Connections</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Followers column -->
+        <section class="rounded-xl border bg-white p-4 shadow-sm">
+        <h2 class="text-lg font-semibold mb-3">Followers</h2>
+
+        <% if (!followers || followers.length === 0) { %>
+            <p class="text-sm text-gray-500">No one follows you yet.</p>
+        <% } else { %>
+            <ul class="space-y-3">
+            <% followers.forEach(f => { %>
+                <li class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <img
+                    src="<%= f.avatar_url || '/avatars/SpongeBob_SquarePants_character.png' %>"
+                    alt="@<%= f.username %> avatar"
+                    class="size-10 rounded-full object-cover ring-1 ring-gray-300"
+                    />
+                    <div class="min-w-0">
+                    <a href="/u/<%= encodeURIComponent(f.username) %>" class="font-medium hover:underline truncate block">
+                        @<%= f.username %>
+                    </a>
+                    <div class="text-xs text-gray-500 truncate">
+                        followed you <%= new Date(f.created_at).toLocaleString() %>
+                    </div>
+                    </div>
+                </div>
+
+                <% if (f.canFollowBack) { %>
+                    <form action="/profile/<%= f.id %>/follow" method="POST" class="shrink-0">
+                    <input type="hidden" name="redirect" value="<%= currentUrl %>" />
+                    <button
+                        type="submit"
+                        class="inline-flex items-center justify-center rounded-md border px-3 py-1.5 hover:bg-gray-50"
+                    >
+                        Follow back
+                    </button>
+                    </form>
+                <% } else { %>
+                    <span class="text-xs text-green-700 bg-green-50 border border-green-200 rounded px-2 py-1">Mutual</span>
+                <% } %>
+                </li>
+            <% }) %>
+            </ul>
+        <% } %>
+        </section>
+
+        <!-- Following column -->
+        <section class="rounded-xl border bg-white p-4 shadow-sm">
+        <h2 class="text-lg font-semibold mb-3">You Follow</h2>
+
+        <% if (!following || following.length === 0) { %>
+            <p class="text-sm text-gray-500">You’re not following anyone yet.</p>
+        <% } else { %>
+            <ul class="space-y-3">
+            <% following.forEach(f => { %>
+                <li class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <img
+                    src="<%= f.avatar_url || '/avatars/SpongeBob_SquarePants_character.png' %>"
+                    alt="@<%= f.username %> avatar"
+                    class="size-10 rounded-full object-cover ring-1 ring-gray-300"
+                    />
+                    <div class="min-w-0">
+                    <a href="/u/<%= encodeURIComponent(f.username) %>" class="font-medium hover:underline truncate block">
+                        @<%= f.username %>
+                    </a>
+                    <div class="text-xs text-gray-500 truncate">
+                        since <%= new Date(f.created_at).toLocaleString() %>
+                    </div>
+                    </div>
+                </div>
+
+                <form action="/profile/<%= f.id %>/unfollow" method="POST" class="shrink-0">
+                    <input type="hidden" name="redirect" value="<%= currentUrl %>" />
+                    <button
+                    type="submit"
+                    class="inline-flex items-center justify-center rounded-md border px-3 py-1.5 bg-red-600 text-white hover:bg-red-700 border-red-600"
+                    >
+                    Unfollow
+                    </button>
+                </form>
+                </li>
+            <% }) %>
+            </ul>
+        <% } %>
+        </section>
+    </div>
+    </div>
+</body>
+</html>

@@ -1,11 +1,9 @@
-// ProjektarbeteDBB/ProjektarbeteDBB/routes/profile.js
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
 const { authenticateToken } = require("../middleware/auth");
 const { uploadAvatar } = require("../middleware/upload");
 
-// Ensure columns bio + avatar_url exist
 (function ensureOptionalColumns() {
   const alters = [
     "ALTER TABLE users ADD COLUMN bio TEXT",
@@ -14,15 +12,94 @@ const { uploadAvatar } = require("../middleware/upload");
   for (const sql of alters) {
     try {
       db.run(sql);
-    } catch (_) {
-      /* ignore if column exists */
-    }
+    } catch (_) {}
   }
 })();
 
-/**
- * GET /profile
- */
+router.get("/connections", authenticateToken, (req, res) => {
+  const me = req.user.id;
+
+  const followers = db
+    .prepare(
+      `
+      SELECT u.id, u.username, u.avatar_url, f.created_at
+      FROM follows f
+      JOIN users u ON u.id = f.follower_id
+      WHERE f.following_id = ?
+      ORDER BY f.created_at DESC
+    `
+    )
+    .all(me);
+
+  const following = db
+    .prepare(
+      `
+      SELECT u.id, u.username, u.avatar_url, f.created_at
+      FROM follows f
+      JOIN users u ON u.id = f.following_id
+      WHERE f.follower_id = ?
+      ORDER BY f.created_at DESC
+    `
+    )
+    .all(me);
+
+  const iFollowSet = new Set(following.map((u) => u.id));
+  const mappedFollowers = followers.map((u) => ({
+    ...u,
+    canFollowBack: !iFollowSet.has(u.id),
+  }));
+
+  res.render("connections", {
+    title: "Connections",
+    followers: mappedFollowers,
+    following,
+    currentUrl: (res.locals && res.locals.currentUrl) || "/profile/connections",
+    user: req.user,
+    isAuthenticated: true,
+  });
+});
+
+router.post("/:id/follow", authenticateToken, (req, res) => {
+  const followerId = req.user.id;
+  const followingId = parseInt(req.params.id, 10);
+  const back = req.body.redirect || req.get("referer") || "/profile";
+
+  try {
+    if (followerId === followingId) return res.redirect(back);
+
+    const exists = db
+      .prepare(
+        "SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ?"
+      )
+      .get(followerId, followingId);
+    if (exists) return res.redirect(back);
+
+    db.prepare(
+      "INSERT INTO follows (follower_id, following_id) VALUES (?, ?)"
+    ).run(followerId, followingId);
+    res.redirect(back);
+  } catch (err) {
+    console.error("POST /profile/:id/follow failed:", err);
+    res.redirect(back);
+  }
+});
+
+router.post("/:id/unfollow", authenticateToken, (req, res) => {
+  const followerId = req.user.id;
+  const followingId = parseInt(req.params.id, 10);
+  const back = req.body.redirect || req.get("referer") || "/profile";
+
+  try {
+    db.prepare(
+      "DELETE FROM follows WHERE follower_id = ? AND following_id = ?"
+    ).run(followerId, followingId);
+    res.redirect(back);
+  } catch (err) {
+    console.error("POST /profile/:id/unfollow failed:", err);
+    res.redirect(back);
+  }
+});
+
 router.get("/", authenticateToken, (req, res) => {
   try {
     const user = db
@@ -30,15 +107,20 @@ router.get("/", authenticateToken, (req, res) => {
         "SELECT id, username, email, bio, avatar_url FROM users WHERE id = ?"
       )
       .get(req.user.id);
+
     if (!user) {
       return res
         .status(404)
         .render("error", { message: "User not found", error: {} });
     }
+
     res.render("profile", {
       title: "Your Profile",
       user,
       isAuthenticated: true,
+      isOwnProfile: true,
+      isFollowing: false,
+      originalUrl: req.originalUrl,
     });
   } catch (err) {
     console.error("GET /profile failed:", err);
@@ -48,11 +130,8 @@ router.get("/", authenticateToken, (req, res) => {
   }
 });
 
-/**
- * POST /profile
- */
 router.post("/", authenticateToken, (req, res) => {
-  const { username, bio } = req.body; // removed email
+  const { username, bio } = req.body;
   try {
     db.run("UPDATE users SET username = ?, bio = ? WHERE id = ?", [
       username,
@@ -83,14 +162,14 @@ router.post("/", authenticateToken, (req, res) => {
       title: "Your Profile",
       user: { ...current, username, bio },
       isAuthenticated: true,
+      isOwnProfile: true,
+      isFollowing: false,
+      originalUrl: req.originalUrl,
       error: "Could not update profile. " + (err.message || err),
     });
   }
 });
 
-/**
- * POST /profile/avatar
- */
 router.post("/avatar", authenticateToken, (req, res) => {
   uploadAvatar(req, res, (err) => {
     if (err) {
@@ -98,6 +177,9 @@ router.post("/avatar", authenticateToken, (req, res) => {
         title: "Your Profile",
         user: req.user,
         isAuthenticated: true,
+        isOwnProfile: true,
+        isFollowing: false,
+        originalUrl: req.originalUrl,
         error: err.message || String(err),
       });
     }
@@ -106,6 +188,9 @@ router.post("/avatar", authenticateToken, (req, res) => {
         title: "Your Profile",
         user: req.user,
         isAuthenticated: true,
+        isOwnProfile: true,
+        isFollowing: false,
+        originalUrl: req.originalUrl,
         error: "No file uploaded.",
       });
     }
@@ -130,10 +215,53 @@ router.post("/avatar", authenticateToken, (req, res) => {
         title: "Your Profile",
         user: req.user,
         isAuthenticated: true,
+        isOwnProfile: true,
+        isFollowing: false,
+        originalUrl: req.originalUrl,
         error: "Failed to save avatar.",
       });
     }
   });
+});
+
+router.get("/:id", authenticateToken, (req, res) => {
+  const userId = parseInt(req.params.id, 10);
+
+  try {
+    const profileUser = db
+      .prepare("SELECT id, username, bio, avatar_url FROM users WHERE id = ?")
+      .get(userId);
+
+    if (!profileUser) {
+      return res
+        .status(404)
+        .render("error", { message: "User not found", error: {} });
+    }
+
+    if (profileUser.id === req.user.id) {
+      return res.redirect("/profile");
+    }
+
+    const follow = db
+      .prepare(
+        "SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ?"
+      )
+      .get(req.user.id, userId);
+
+    res.render("profile", {
+      title: profileUser.username + "'s Profile",
+      user: profileUser,
+      isAuthenticated: true,
+      isOwnProfile: false,
+      isFollowing: !!follow,
+      originalUrl: req.originalUrl,
+    });
+  } catch (err) {
+    console.error("GET /profile/:id failed:", err);
+    res
+      .status(500)
+      .render("error", { message: "Failed to load profile", error: {} });
+  }
 });
 
 module.exports = router;

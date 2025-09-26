@@ -28,7 +28,7 @@ function getPostById(req, res) {
   const post = db
     .prepare(
       `
-    SELECT p.id, p.header, p.content, p.created_at, p.hero_image, p.is_flagged, u.username
+    SELECT p.id, p.header, p.content, p.created_at, p.hero_image, p.is_flagged, p.user_id, u.username
     FROM posts p
     JOIN users u ON u.id = p.user_id
     WHERE p.id = ?
@@ -59,6 +59,18 @@ function getPostById(req, res) {
   const likesCount = likes?.count;
   const likedByUser = likes?.by_user;
 
+  let isFollowing = false;
+  const viewerId = req.user?.id || null;
+  const authorId = post?.user_id || null;
+  if (viewerId && authorId && viewerId !== authorId) {
+    const row = db
+      .prepare(
+        "SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ?"
+      )
+      .get(viewerId, authorId);
+    isFollowing = !!row;
+  }
+
   if (!post)
     return res.status(404).render("error", { error: "Post not found" });
 
@@ -69,6 +81,8 @@ function getPostById(req, res) {
     user: req.user,
     likesCount,
     likedByUser,
+    authorId,
+    isFollowing,
   });
 }
 

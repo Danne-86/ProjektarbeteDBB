@@ -1,4 +1,3 @@
-// app.js
 const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
@@ -11,7 +10,6 @@ const { SECRET } = require("./utils/authToken");
 
 const authorRouter = require("./routes/author");
 const indexRouter = require("./routes/index");
-const usersRouter = require("./routes/users");
 const authRouter = require("./routes/auth");
 const adminRouter = require("./routes/admin");
 const feedRouter = require("./routes/feed");
@@ -27,7 +25,7 @@ app.set("view engine", "ejs");
 // Core middleware (order matters)
 app.use(logger("dev"));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Layouts
@@ -156,7 +154,6 @@ app.use("/", feedRouter);
 app.use("/blog", blogRouter);
 app.use("/u", authorRouter);
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
 app.use("/", authRouter);
 app.use("/admin", adminRouter);
 app.use("/profile", profileRouter);
