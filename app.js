@@ -132,6 +132,23 @@ app.use((req, res, next) => {
   next();
 });
 
+const db = require("./db"); // safe: db does NOT import app.js
+app.use((req, res, next) => {
+  const isGetHtml =
+    req.method === "GET" && (req.headers.accept || "").includes("text/html");
+  if (isGetHtml && req.session && req.session.user) {
+    try {
+      const fresh = db
+        .prepare(
+          "SELECT id, username, email, bio, avatar_url, is_admin FROM users WHERE id = ?"
+        )
+        .get(req.session.user.id);
+      if (fresh) req.session.user = fresh;
+    } catch (_) {}
+  }
+  next();
+});
+
 // Routers
 
 app.use("/", feedRouter);

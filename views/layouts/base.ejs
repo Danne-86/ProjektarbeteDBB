@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link rel="stylesheet" href="/assets/tailwind.css" />
     <style>
       :root {
         --header-h: 64px; /* set dynamically below */
@@ -12,9 +11,11 @@
     </style>
   </head>
   <body class="min-h-dvh bg-neutral-50 text-neutral-900 flex flex-col">
-    <% const _isAuth = (typeof isAuthenticated !== 'undefined' && isAuthenticated) ? true : false; const _user
-    = (typeof user !== 'undefined' && user) ? user : null; const _avatar = (_user && _user.avatar_url) ?
-    _user.avatar_url : '/avatars/SpongeBob_SquarePants_character.png'; %>
+    <% 
+    const _isAuth = (typeof isAuthenticated !== 'undefined' && isAuthenticated) ? true : false; 
+    const _user = (typeof user !== 'undefined' && user) ? user : null; 
+    const _avatar = (_user && _user.avatar_url) ? _user.avatar_url : '/avatars/SpongeBob_SquarePants_character.png'; 
+    %>
 
     <header id="site-header" class="sticky top-0 z-50 w-full bg-white border-b border-gray-200">
       <div class="w-full bg-white">
