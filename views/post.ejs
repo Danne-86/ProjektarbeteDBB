@@ -13,99 +13,91 @@
         <header class="mb-4">
           <div class="flex flex-row items-center gap-1">
             <h1 class="text-3xl font-bold mb-2 flex-grow"><%= post.header %></h1>
-            <!-- Actions group: Edit / Delete / Report (uniform size + spacing) -->
-              <div class="flex items-center gap-2 sm:ml-auto">
-                <% if (user && user.id === post.user_id) { %>
-                  <a
-                    href="/blog/<%= post.id %>/edit"
-                    class="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
-                  >
-                    Edit
-                  </a>
-                  <form
-                    action="/blog/<%= post.id %>/delete"
-                    method="POST"
-                    onsubmit="return confirm('Delete this post? This cannot be undone.');"
-                  >
-                    <button
-                      type="submit"
-                      class="inline-flex items-center px-3 py-1.5 rounded-md border border-red-300 text-sm text-red-700 hover:bg-red-50"
-                    >
-                      Delete
-                    </button>
-                  </form>
-                <% } %>
-              </div>
-            <!-- Report -->
-            <% if (!post.is_flagged){ %>
-            <form action="/posts/<%= post.id %>/flag" method="POST">
-              <button
-                type="submit"
-                name="id"
-                value="<%= post.id %>"
-                class="mb-2 p-1 sm:px-3 flex items-center border rounded text-gray-500 hover:text-red-800 border-gray-300 hover:border-red-300 hover:bg-red-50"
-              >
-                <svg
-                  class="shrink-0 inline w-4 h-4"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
+
+            <!-- Actions (Edit / Delete / Report) -->
+            <div class="flex items-center gap-2">
+              <% if (user && (user.id === post.user_id || user.is_admin)) { %>
+                <!-- Edit Post -->
+                <a
+                  href="/blog/<%= post.id %>/edit"
+                  class="inline-flex items-center px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  title="Edit post"
+                  aria-label="Edit post"
                 >
-                  <path
-                    d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"
-                  />
-                </svg>
-                <span class="hidden sm:inline ml-1 text-xs">Report</span>
-              </button>
-            </form>
-            <% } else {%>
-            <div class="mb-2 p-1 sm:px-3 items-center border rounded text-red-800 border-red-800">
-              <svg
-                class="shrink-0 inline w-4 h-4"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"
-                />
-              </svg>
-              <span class="hidden sm:inline ml-1 text-xs">Reported</span>
+                  <!-- Pencil icon -->
+                  <svg class="w-4 h-4 sm:mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41L18.37 3.29a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                  </svg>
+                  <span class="hidden sm:inline">Edit</span>
+                </a>
+
+                <!-- Delete Post -->
+                <form action="/blog/<%= post.id %>/delete" method="POST" onsubmit="return confirm('Delete this post?');">
+                  <button
+                    type="submit"
+                    class="inline-flex items-center px-3 py-1 rounded border border-red-300 text-red-700 hover:bg-red-50"
+                    title="Delete post"
+                    aria-label="Delete post"
+                  >
+                    <!-- Trash icon -->
+                    <svg class="w-4 h-4 sm:mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                    </svg>
+                    <span class="hidden sm:inline">Delete</span>
+                  </button>
+                </form>
+              <% } %>
+
+              <!-- Report Post -->
+              <% if (!post.is_flagged) { %>
+                <form action="/posts/<%= post.id %>/flag" method="POST">
+                  <button
+                    type="submit"
+                    class="inline-flex items-center px-3 py-1 rounded border border-gray-300 text-gray-500 hover:text-red-800 hover:border-red-300 hover:bg-red-50"
+                    title="Report post"
+                    aria-label="Report post"
+                  >
+                    <svg class="w-4 h-4 sm:mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"/>
+                    </svg>
+                    <span class="hidden sm:inline">Report</span>
+                  </button>
+                </form>
+              <% } else { %>
+                <span
+                  class="inline-flex items-center px-3 py-1 rounded border border-red-800 text-red-800"
+                  title="Reported"
+                  aria-label="Reported"
+                >
+                  <svg class="w-4 h-4 sm:mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"/>
+                  </svg>
+                  <span class="hidden sm:inline">Reported</span>
+                </span>
+              <% } %>
             </div>
-            <% } %>
-            <!-- End Report -->
+            <!-- /Actions -->
           </div>
+
           <div class="text-sm text-gray-500">
             By
             <a
               href="/u/<%= encodeURIComponent(post.username) %>"
               class="font-medium text-indigo-700 hover:underline"
-              >@<%= post.username %></a
-            >
+            >@<%= post.username %></a>
             · <%= new Date(post.created_at).toLocaleString() %>
           </div>
+
           <div class="flex flex-row items-center">
             <!-- Connections -->
             <a
               href="/profile/<%= encodeURIComponent(post.user_id) %>"
               class="my-2 p-1 flex items-center border rounded text-gray-500 hover:text-purple-700 border-gray-300 hover:border-purple-300 hover:bg-purple-50"
             >
-              <svg
-                class="shrink-0 inline w-4 h-4"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z"
-                  clip-rule="evenodd"
-                />
+              <svg class="shrink-0 inline w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z" clip-rule="evenodd"/>
               </svg>
-              <span class="ml-1 text-xs"><%= encodeURIComponent(post.username) %>'s Profile</span>
+              <span class="ml-1 text-xs"><%= post.username %>'s Profile</span>
             </a>
 
             <!-- Follow -->
@@ -115,7 +107,6 @@
               method="POST"
               class="inline-block ml-2"
             >
-              <!-- Redirect back to this post after action -->
               <input
                 type="hidden"
                 name="redirect"
@@ -125,20 +116,10 @@
                 type="submit"
                 class="py-1 px-3 flex items-center border rounded <%= isFollowing ? 'bg-red-600 text-white hover:bg-red-700 border-red-600' : 'text-gray-500 hover:text-purple-700 border-gray-300 hover:border-purple-300 hover:bg-purple-50' %>"
               >
-                <svg
-                  class="shrink-0 inline w-4 h-4"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H7Zm8-1a1 1 0 0 1 1-1h1v-1a1 1 0 1 1 2 0v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 0 1-1-1Z"
-                    clip-rule="evenodd"
-                  />
+                <svg class="shrink-0 inline w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path fill-rule="evenodd" d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H7Zm8-1a1 1 0 0 1 1-1h1v-1a1 1 0 1 1 2 0v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
                 </svg>
-                <span class="mx-1 text-xs"> <%= isFollowing ? 'Unfollow' : 'Follow' %> </span>
+                <span class="mx-1 text-xs"><%= isFollowing ? 'Unfollow' : 'Follow' %></span>
               </button>
             </form>
             <% } %>
@@ -146,9 +127,10 @@
             <!-- End Connections -->
           </div>
         </header>
+
         <section class="prose max-w-none">
           <% if (post.hero_image) { %>
-          <img src="<%= post.hero_image %>" alt="Post image" class="w-full rounded-lg mb-4" />
+            <img src="<%= post.hero_image %>" alt="Post image" class="w-full rounded-lg mb-4" />
           <% } %>
           <div class="whitespace-pre-wrap"><%= post.content %></div>
         </section>
@@ -163,24 +145,14 @@
               value="<%= post.id %>"
               class="py-1 px-3 flex items-center border rounded text-gray-500 hover:text-purple-700 border-gray-300 hover:border-purple-300 hover:bg-purple-50"
             >
-              <svg
-                class="shrink-0 inline w-4 h-4"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M15.03 9.684h3.965c.322 0 .64.08.925.232.286.153.532.374.717.645a2.109 2.109 0 0 1 .242 1.883l-2.36 7.201c-.288.814-.48 1.355-1.884 1.355-2.072 0-4.276-.677-6.157-1.256-.472-.145-.924-.284-1.348-.404h-.115V9.478a25.485 25.485 0 0 0 4.238-5.514 1.8 1.8 0 0 1 .901-.83 1.74 1.74 0 0 1 1.21-.048c.396.13.736.397.96.757.225.36.32.788.269 1.211l-1.562 4.63ZM4.177 10H7v8a2 2 0 1 1-4 0v-6.823C3 10.527 3.527 10 4.176 10Z"
-                  clip-rule="evenodd"
-                />
+              <svg class="shrink-0 inline w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M15.03 9.684h3.965c.322 0 .64.08.925.232.286.153.532.374.717.645a2.109 2.109 0 0 1 .242 1.883l-2.36 7.201c-.288.814-.48 1.355-1.884 1.355-2.072 0-4.276-.677-6.157-1.256-.472-.145-.924-.284-1.348-.404h-.115V9.478a25.485 25.485 0 0 0 4.238-5.514 1.8 1.8 0 0 1 .901-.83 1.74 1.74 0 0 1 1.21-.048c.396.13.736.397.96.757.225.36.32.788.269 1.211l-1.562 4.63ZM4.177 10H7v8a2 2 0 1 1-4 0v-6.823C3 10.527 3.527 10 4.176 10Z" clip-rule="evenodd"/>
               </svg>
               <span class="mx-1">Like</span>
             </button>
             <span class="text-gray-500 text-sm">(<%= likesCount %> likes)</span>
           </form>
-          <% } else {%>
+          <% } else { %>
           <form action="/posts/<%= post.id %>/like" method="POST" class="flex flex-row gap-1 items-center">
             <button
               type="submit"
@@ -188,24 +160,14 @@
               value="<%= post.id %>"
               class="py-1 px-3 flex items-center border rounded text-purple-700 hover:text-purple-700 border-transparent hover:border-purple-300 hover:bg-purple-50"
             >
-              <svg
-                class="shrink-0 inline w-4 h-4"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M15.03 9.684h3.965c.322 0 .64.08.925.232.286.153.532.374.717.645a2.109 2.109 0 0 1 .242 1.883l-2.36 7.201c-.288.814-.48 1.355-1.884 1.355-2.072 0-4.276-.677-6.157-1.256-.472-.145-.924-.284-1.348-.404h-.115V9.478a25.485 25.485 0 0 0 4.238-5.514 1.8 1.8 0 0 1 .901-.83 1.74 1.74 0 0 1 1.21-.048c.396.13.736.397.96.757.225.36.32.788.269 1.211l-1.562 4.63ZM4.177 10H7v8a2 2 0 1 1-4 0v-6.823C3 10.527 3.527 10 4.176 10Z"
-                  clip-rule="evenodd"
-                />
+              <svg class="shrink-0 inline w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M15.03 9.684h3.965c.322 0 .64.08.925.232.286.153.532.374.717.645a2.109 2.109 0 0 1 .242 1.883l-2.36 7.201c-.288.814-.48 1.355-1.884 1.355-2.072 0-4.276-.677-6.157-1.256-.472-.145-.924-.284-1.348-.404h-.115V9.478a25.485 25.485 0 0 0 4.238-5.514 1.8 1.8 0 0 1 .901-.83 1.74 1.74 0 0 1 1.21-.048c.396.13.736.397.96.757.225.36.32.788.269 1.211l-1.562 4.63ZM4.177 10H7v8a2 2 0 1 1-4 0v-6.823C3 10.527 3.527 10 4.176 10Z" clip-rule="evenodd"/>
               </svg>
               <span class="mx-1">Like</span>
             </button>
             <span class="text-gray-500 text-sm">(<%= likesCount %> likes)</span>
           </form>
-          <%}%>
+          <% } %>
           <!-- End Like -->
         </div>
 
@@ -227,6 +189,7 @@
                 class="rounded-md p-2 flex-grow"
                 placeholder="Write a comment..."
                 id="comment"
+                required
               />
               <button
                 type="submit"
@@ -240,81 +203,164 @@
           <!-- End Comment input field -->
 
           <% comments.forEach(comment => { %>
-          <div class="text-gray-500 pt-2">
-            <div class="border rounded border-gray-200 w-full flex flex-col p-1 bg-white">
-              <div class="flex flex-row gap-2 w-full px-1">
-                <p class="font-medium">
-                  <a href="/profile/<%= comment.user_id %>">
-                    <svg
-                      class="shrink-0 inline w-4 h-4"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                    <span class="hover:underline"><%= comment.username %></span></a
-                  >
-                </p>
+            <div class="text-gray-500 pt-2">
+              <div class="border rounded border-gray-200 w-full flex flex-col p-1 bg-white">
+                <!-- Row 1: name, date, actions -->
+                <div class="flex items-center gap-2 w-full px-1">
+                  <p class="font-medium">
+                    <a href="/profile/<%= comment.user_id %>" class="inline-flex items-center">
+                      <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M12 20a7.966 7.966 0 0 1-5.002-1.756v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z" clip-rule="evenodd"/>
+                      </svg>
+                      <span class="hover:underline"><%= comment.username %></span>
+                    </a>
+                  </p>
 
-                <p class="flex-grow"><%= comment.created_at %></p>
+                  <p class="flex-grow text-xs sm:text-sm"><%= comment.created_at %></p>
 
-                <% if (!comment.is_flagged){ %>
-                <form action="/posts/<%= post.id %>/<%= comment.id %>/flag" method="POST">
-                  <button
-                    type="submit"
-                    name="id"
-                    value="<%= comment.id %>"
-                    class="p-1 flex items-center border rounded text-gray-500 hover:text-red-800 border-transparent hover:border-red-300 hover:bg-red-50"
-                  >
-                    <svg
-                      class="shrink-0 inline w-4 h-4"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"
-                      />
-                    </svg>
-                  </button>
-                </form>
-                <% } else {%>
-                <div class="p-1 flex items-center border text-red-800 border-transparent">
-                  <svg
-                    class="shrink-0 inline w-4 h-4"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"
-                    />
-                  </svg>
+                  <!-- Actions: Edit / Delete / Report (small like Report) -->
+                  <div class="flex items-center gap-2">
+                    <% if (user && (user.id === comment.user_id || user.is_admin)) { %>
+                      <!-- Edit -->
+                      <button
+                        type="button"
+                        class="inline-flex items-center px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
+                        title="Edit comment"
+                        aria-label="Edit comment"
+                        onclick="toggleEdit('<%= comment.id %>')"
+                      >
+                        <svg class="w-4 h-4 sm:mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41L18.37 3.29a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                        </svg>
+                        <span class="hidden sm:inline">Edit</span>
+                      </button>
+
+                      <!-- Delete -->
+                      <form action="/posts/<%= post.id %>/comments/<%= comment.id %>/delete" method="POST" onsubmit="return confirm('Delete this comment?');">
+                        <button
+                          type="submit"
+                          class="inline-flex items-center px-3 py-1 rounded border border-red-300 text-red-700 hover:bg-red-50"
+                          title="Delete comment"
+                          aria-label="Delete comment"
+                        >
+                          <svg class="w-4 h-4 sm:mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                          </svg>
+                          <span class="hidden sm:inline">Delete</span>
+                        </button>
+                      </form>
+                    <% } %>
+
+                    <!-- Report / Reported -->
+                    <% if (!comment.is_flagged){ %>
+                      <form action="/posts/<%= post.id %>/<%= comment.id %>/flag" method="POST">
+                        <button
+                          type="submit"
+                          class="inline-flex items-center px-3 py-1 rounded border border-gray-300 text-gray-500 hover:text-red-800 hover:border-red-300 hover:bg-red-50"
+                          title="Report comment"
+                          aria-label="Report comment"
+                        >
+                          <svg class="w-4 h-4 sm:mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"/>
+                          </svg>
+                          <span class="hidden sm:inline">Report</span>
+                        </button>
+                      </form>
+                    <% } else { %>
+                      <span
+                        class="inline-flex items-center px-3 py-1 rounded border border-red-800 text-red-800"
+                        title="Reported"
+                        aria-label="Reported"
+                      >
+                        <svg class="w-4 h-4 sm:mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"/>
+                        </svg>
+                        <span class="hidden sm:inline">Reported</span>
+                      </span>
+                    <% } %>
+                  </div>
                 </div>
-                <%}%>
+
+                <!-- Row 2: content + hidden edit-form -->
+                <div class="px-1 py-1">
+                  <p id="comment-text-<%= comment.id %>" class="text-black whitespace-pre-wrap"><%= comment.content %></p>
+
+                  <% if (user && (user.id === comment.user_id || user.is_admin)) { %>
+                    <form
+                      id="comment-edit-<%= comment.id %>"
+                      class="hidden mt-2"
+                      action="/posts/<%= post.id %>/comments/<%= comment.id %>/edit"
+                      method="POST"
+                    >
+                      <textarea
+                        name="content"
+                        rows="3"
+                        class="w-full rounded-md border border-gray-300 p-2 outline-none focus:ring-2 focus:ring-purple-600"
+                      ><%= comment.content %></textarea>
+                      <div class="mt-2 flex items-center gap-2">
+                        <button
+                          type="submit"
+                          class="inline-flex items-center px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
+                          title="Save"
+                        >
+                          <!-- check -->
+                          <svg class="w-4 h-4 sm:mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                          </svg>
+                          <span class="hidden sm:inline">Save</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="inline-flex items-center px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
+                          onclick="toggleEdit('<%= comment.id %>', true)"
+                          title="Cancel"
+                        >
+                          <!-- x -->
+                          <svg class="w-4 h-4 sm:mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                          </svg>
+                          <span class="hidden sm:inline">Cancel</span>
+                        </button>
+                      </div>
+                    </form>
+                  <% } %>
+                </div>
               </div>
-              <p class="text-black px-1"><%= comment.content %></p>
             </div>
-          </div>
           <% }); %>
         </div>
         <!-- End Comments -->
       </article>
 
       <div class="mt-6">
-        <% const _prev = (typeof prevUrl !== 'undefined') ? prevUrl : null; const _curr = (typeof currentUrl
-        !== 'undefined') ? currentUrl : null; // Avoid going back to same page or undefined const backUrl =
-        (_prev && _prev !== _curr) ? _prev : '/feed'; %>
-        <a href="<%= prevUrl %>" class="text-indigo-600 hover:underline"> &larr; Back </a>
+        <% 
+          const _prev = (typeof prevUrl !== 'undefined') ? prevUrl : null;
+          const _curr = (typeof currentUrl !== 'undefined') ? currentUrl : null;
+          const backUrl = (_prev && _prev !== _curr) ? _prev : '/feed';
+        %>
+        <a href="<%= backUrl %>" class="text-indigo-600 hover:underline"> &larr; Back </a>
       </div>
     </main>
+
+    <script>
+      function toggleEdit(id, cancel=false) {
+        const box = document.getElementById('comment-edit-' + id);
+        const text = document.getElementById('comment-text-' + id);
+        if (!box || !text) return;
+        const isHidden = box.classList.contains('hidden');
+        if (cancel) {
+          box.classList.add('hidden');
+          text.classList.remove('hidden');
+          return;
+        }
+        if (isHidden) {
+          box.classList.remove('hidden');
+          text.classList.add('hidden');
+        } else {
+          box.classList.add('hidden');
+          text.classList.remove('hidden');
+        }
+      }
+    </script>
   </body>
 </html>

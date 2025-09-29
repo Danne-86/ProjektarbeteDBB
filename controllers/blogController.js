@@ -385,6 +385,85 @@ function createComment(req, res) {
   }
 }
 
+function updateComment(req, res) {
+  try {
+    if (!req.user?.id) {
+      return res.status(401).render("login", {
+        title: "Login",
+        errors: ["Please log in to continue."],
+        errorMessage: null,
+        values: {},
+      });
+    }
+
+    const { postId, commentId } = req.params;
+    const existing = db
+      .prepare(`SELECT id, user_id, post_id FROM comments WHERE id = ? AND post_id = ?`)
+      .get(commentId, postId);
+
+    if (!existing) {
+      return res.status(404).render("error", { message: "Comment not found" });
+    }
+
+    const isOwnerOrAdmin = existing.user_id === req.user.id || !!req.user.is_admin;
+    if (!isOwnerOrAdmin) {
+      return res.status(403).render("error", { message: "You can't edit this comment." });
+    }
+
+    let content = (req.body.content || "").trim();
+    const errors = [];
+    if (!content) errors.push("Comment is required.");
+    if (content.length > 500) errors.push("Content must be ≤ 500 characters.");
+
+    if (errors.length) {
+      req.session.errorMessage = errors.join(" ");
+      return res.redirect(`/posts/${postId}#c-${commentId}`);
+    }
+
+    db.prepare(`UPDATE comments SET content = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`)
+      .run(content, commentId);
+
+    return res.redirect(`/posts/${postId}#c-${commentId}`);
+  } catch (e) {
+    console.error("updateComment error", e);
+    return res.status(500).render("error", { message: "Error updating comment" });
+  }
+}
+
+// DELETE comment: POST /posts/:postId/comments/:commentId/delete
+function deleteComment(req, res) {
+  try {
+    if (!req.user?.id) {
+      return res.status(401).render("login", {
+        title: "Login",
+        errors: ["Please log in to continue."],
+        errorMessage: null,
+        values: {},
+      });
+    }
+
+    const { postId, commentId } = req.params;
+    const existing = db
+      .prepare(`SELECT id, user_id, post_id FROM comments WHERE id = ? AND post_id = ?`)
+      .get(commentId, postId);
+
+    if (!existing) {
+      return res.status(404).render("error", { message: "Comment not found" });
+    }
+
+    const isOwnerOrAdmin = existing.user_id === req.user.id || !!req.user.is_admin;
+    if (!isOwnerOrAdmin) {
+      return res.status(403).render("error", { message: "You can't delete this comment." });
+    }
+
+    db.prepare(`DELETE FROM comments WHERE id = ?`).run(commentId);
+    return res.redirect(`/posts/${postId}`);
+  } catch (e) {
+    console.error("deleteComment error", e);
+    return res.status(500).render("error", { message: "Error deleting comment" });
+  }
+}
+
 function flagPost(req, res) {
   const { id } = req.params;
   if (!req.user?.id) {
@@ -448,7 +527,9 @@ module.exports = {
   flagPost,
   flagComment,
   likePost,
-  renderEditForm,      // GET  /blog/:id/edit
-  updatePost,          // POST /blog/:id/edit
-  deletePost,          // POST /blog/:id/delete
+  renderEditForm,       // GET  /blog/:id/edit
+  updatePost,           // POST /blog/:id/edit
+  deletePost,           // POST /blog/:id/delete
+  updateComment,        // POST /posts/:postId/comments/:commentId/edit
+  deleteComment         // POST /posts/:postId/comments/:commentId/delete
 };

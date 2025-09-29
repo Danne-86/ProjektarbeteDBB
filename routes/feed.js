@@ -19,4 +19,10 @@ router.post("/posts/:postId/:commentId/flag", blogController.flagComment);
 // Like
 router.post("/posts/:id/like", blogController.likePost);
 
+// Edit comment
+router.post("/posts/:postId/comments/:commentId/edit", blogController.updateComment);
+
+// Delete comment
+router.post("/posts/:postId/comments/:commentId/delete", blogController.deleteComment);
+
 module.exports = router;
