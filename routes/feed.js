@@ -5,6 +5,7 @@ const blogController = require("../controllers/blogController");
 
 router.use(cookieParser());
 
+// Accept only app-internal URLs
 function safeUrl(url, fallback = "/feed") {
   if (!url || typeof url !== "string") return fallback;
   try {
@@ -18,6 +19,9 @@ function safeUrl(url, fallback = "/feed") {
   }
 }
 
+/**
+ *    If the request is a GET AND the path does NOT start with /posts/, remember that URL as prevUrl in a cookie.
+ */
 router.use((req, res, next) => {
   if (req.method === "GET" && !req.path.startsWith("/posts/")) {
     const here = safeUrl(req.originalUrl, "/feed");
@@ -25,12 +29,18 @@ router.use((req, res, next) => {
       path: "/",
       sameSite: "lax",
       httpOnly: false,
-      maxAge: 1000 * 60 * 60 * 12, // 12h
+      maxAge: 1000 * 60 * 60 * 12,
     });
   }
   next();
 });
 
+/**
+ * 2) When opening a post:
+ *    Prefer ?prevUrl
+ *    Else use the cookie from the tracker above
+ *    Else fallback to '/feed'
+ */
 function preparePostLocals(req, res, next) {
   const q = req.query.prevUrl ? safeUrl(req.query.prevUrl) : undefined;
   const c = req.cookies.prevUrl ? safeUrl(req.cookies.prevUrl) : undefined;
@@ -48,6 +58,9 @@ function preparePostLocals(req, res, next) {
   next();
 }
 
+/**
+ *   Carry prevUrl from body (if provided) OR fall back to the cookie we track globally
+ */
 function carryPrevOnPost(req, res, next) {
   const bodyPrev = req.body?.prevUrl ? safeUrl(req.body.prevUrl) : undefined;
   const cookiePrev = req.cookies.prevUrl
@@ -72,7 +85,7 @@ function carryPrevOnPost(req, res, next) {
   next();
 }
 
-// -------------------- Routes --------------------
+//  Routes
 
 router.get("/feed", blogController.getFeed);
 
