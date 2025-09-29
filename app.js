@@ -1,4 +1,3 @@
-// app.js
 const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
@@ -11,12 +10,12 @@ const { SECRET } = require("./utils/authToken");
 
 const authorRouter = require("./routes/author");
 const indexRouter = require("./routes/index");
-const usersRouter = require("./routes/users");
 const authRouter = require("./routes/auth");
 const adminRouter = require("./routes/admin");
 const feedRouter = require("./routes/feed");
 const blogRouter = require("./routes/blog");
 const profileRouter = require("./routes/profile");
+const searchRouter = require("./routes/search");
 
 const app = express();
 
@@ -27,7 +26,7 @@ app.set("view engine", "ejs");
 // Core middleware (order matters)
 app.use(logger("dev"));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Layouts
@@ -57,14 +56,15 @@ app.use((req, res, next) => {
   if (res.locals.user && !req.user) req.user = res.locals.user;
 
   // EJS wont crash if these are undefined
-  if (typeof res.locals.successMessage === "undefined") res.locals.successMessage = null;
-  if (typeof res.locals.errorMessage === "undefined") res.locals.errorMessage = null;
+  if (typeof res.locals.successMessage === "undefined")
+    res.locals.successMessage = null;
+  if (typeof res.locals.errorMessage === "undefined")
+    res.locals.errorMessage = null;
   if (typeof res.locals.errors === "undefined") res.locals.errors = null;
   if (typeof res.locals.values === "undefined") res.locals.values = {};
 
-
   // Flash messages (one-time)
-   if (req.session && req.session.successMessage) {
+  if (req.session && req.session.successMessage) {
     res.locals.successMessage = req.session.successMessage;
     delete req.session.successMessage;
   }
@@ -132,16 +132,33 @@ app.use((req, res, next) => {
   next();
 });
 
+const db = require("./db"); // safe: db does NOT import app.js
+app.use((req, res, next) => {
+  const isGetHtml =
+    req.method === "GET" && (req.headers.accept || "").includes("text/html");
+  if (isGetHtml && req.session && req.session.user) {
+    try {
+      const fresh = db
+        .prepare(
+          "SELECT id, username, email, bio, avatar_url, is_admin FROM users WHERE id = ?"
+        )
+        .get(req.session.user.id);
+      if (fresh) req.session.user = fresh;
+    } catch (_) {}
+  }
+  next();
+});
+
 // Routers
 
 app.use("/", feedRouter);
 app.use("/blog", blogRouter);
 app.use("/u", authorRouter);
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
 app.use("/", authRouter);
 app.use("/admin", adminRouter);
 app.use("/profile", profileRouter);
+app.use("/search", searchRouter);
 
 // 404
 app.use(function (req, res, next) {

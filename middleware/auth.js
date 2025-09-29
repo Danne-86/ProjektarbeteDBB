@@ -1,6 +1,4 @@
-// middleware/auth.js
 exports.authenticateToken = (req, res, next) => {
-  // Session-baserad auth
   const user = req.session && req.session.user;
   if (user) {
     req.user = user;
@@ -28,7 +26,9 @@ exports.ensureAdmin = (req, res, next) => {
     return next();
   }
   if (req.accepts("html")) {
-    return res.status(403).render("error", { error: "Forbidden", message: "Forbidden" });
+    return res
+      .status(403)
+      .render("error", { error: "Forbidden", message: "Forbidden" });
   }
   return res.status(403).json({ error: "Forbidden" });
 };

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <main class="container mx-auto px-4 py-8 max-w-5xl">
+    <h1 class="text-2xl font-bold mb-6">Connections</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Followers column -->
+      <section>
+        <h2 class="text-xl font-semibold mb-4">Followers</h2>
+        <% if (followers.length === 0) { %>
+          <p class="text-gray-500">No one follows you yet.</p>
+        <% } %>
+        <div class="space-y-4">
+          <% followers.forEach(f => { %>
+            <div class="flex items-center gap-4 p-4 rounded-lg bg-white shadow">
+              <img src="<%= f.avatar_url || '/avatars/SpongeBob_SquarePants_character.png' %>"
+                   class="w-12 h-12 rounded-full border object-cover" />
+
+              <div class="flex-1">
+                <div class="font-medium"><%= f.username %></div>
+                <div class="flex gap-2 mt-1 text-sm">
+                  <a href="/profile/<%= f.id %>"
+                     class="inline-flex justify-center rounded-md p-[0.5rem] bg-purple-700 text-white hover:bg-purple-800">Profile</a>
+                  <a href="/u/<%= encodeURIComponent(f.username) %>"
+                     class="inline-flex justify-center rounded-md p-[0.5rem] bg-purple-700 text-white hover:bg-purple-800">Feed</a>
+                  <% if (f.canFollowBack) { %>
+                  <form action="/profile/<%= f.id %>/follow" method="POST">
+                    <input type="hidden" name="redirect" value="<%= currentUrl %>" />
+                    <button class="p-[0.5rem] rounded bg-green-600 text-white hover:bg-green-700">
+                      Follow
+                    </button>
+                </form>
+              <% } %>
+                </div>
+              </div>
+
+              
+            </div>
+          <% }) %>
+        </div>
+      </section>
+
+      <!-- Following column -->
+      <section>
+        <h2 class="text-xl font-semibold mb-4">Following</h2>
+        <% if (following.length === 0) { %>
+          <p class="text-gray-500">You are not following anyone yet.</p>
+        <% } %>
+        <div class="space-y-4">
+          <% following.forEach(f => { %>
+            <div class="flex items-center gap-4 p-4 rounded-lg bg-white shadow">
+              <img src="<%= f.avatar_url || '/avatars/SpongeBob_SquarePants_character.png' %>"
+                   class="w-12 h-12 rounded-full border object-cover" />
+
+              <div class="flex-1">
+                <div class="font-medium"><%= f.username %></div>
+                <div class="flex gap-2 mt-1 text-sm">
+                  <a href="/profile/<%= f.id %>"
+                     class="inline-flex justify-center rounded-md p-[0.5rem] bg-purple-700 text-white hover:bg-purple-800">Profile</a>
+                  <a href="/u/<%= encodeURIComponent(f.username) %>"
+                     class="inline-flex justify-center rounded-md p-[0.5rem] bg-purple-700 text-white hover:bg-purple-800">Feed</a>
+                  <form action="/profile/<%= f.id %>/unfollow" method="POST">
+                  <input type="hidden" name="redirect" value="<%= currentUrl %>" />
+                  <button class="p-[0.5rem] rounded bg-red-600 text-white hover:bg-red-700">
+                    Unfollow
+                  </button>
+              </form>
+                </div>
+              </div>
+
+              
+            </div>
+          <% }) %>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

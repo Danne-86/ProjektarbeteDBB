@@ -5,54 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= title %></title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
   </head>
   <body class="bg-gray-50 min-h-screen">
-    <main class="container mx-auto px-4 py-8 max-w-3xl">
-      <article class="bg-white rounded-xl shadow p-6">
+    <main class="container mx-auto sm:px-4 sm:py-8 max-w-3xl">
+      <article class="bg-white sm:rounded-xl sm:shadow sm:p-6">
         <header class="mb-4">
           <div class="flex flex-row items-center">
             <h1 class="text-3xl font-bold mb-2 flex-grow"><%= post.header %></h1>
             <!-- Actions group: Edit / Delete / Report (uniform size + spacing) -->
               <div class="flex items-center gap-2 sm:ml-auto">
-                    <% if (user && user.id === post.user_id) { %>
-                      <a
-                        href="/blog/<%= post.id %>/edit"
-                        class="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        Edit
-                      </a>
-                      <form
-                        action="/blog/<%= post.id %>/delete"
-                        method="POST"
-                        onsubmit="return confirm('Delete this post? This cannot be undone.');"
-                      >
-                        <button
-                          type="submit"
-                          class="inline-flex items-center px-3 py-1.5 rounded-md border border-red-300 text-sm text-red-700 hover:bg-red-50"
-                        >
-                          Delete
-                        </button>
-                      </form>
-                    <% } %>
-
-                    <% if (!post.is_flagged) { %>
-                      <form action="/posts/<%= post.id %>/flag" method="POST">
-                        <button
-                          type="submit"
-                          class="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 text-sm text-gray-500 hover:text-red-800 hover:border-red-300 hover:bg-red-50"
-                        >
-                          <span class="mr-1">Report</span>
-                          <svg class="shrink-0 inline w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"/></svg>
-                        </button>
-                      </form>
-                    <% } else { %>
-                      <span class="inline-flex items-center px-3 py-1.5 rounded-md border border-red-800 text-sm text-red-800">
-                        <span class="mr-1">Reported</span>
-                        <svg class="shrink-0 inline w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"/></svg>
-                      </span>
-                    <% } %>
-                  </div>
-                </div>
+                <% if (user && user.id === post.user_id) { %>
+                  <a
+                    href="/blog/<%= post.id %>/edit"
+                    class="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    Edit
+                  </a>
+                  <form
+                    action="/blog/<%= post.id %>/delete"
+                    method="POST"
+                    onsubmit="return confirm('Delete this post? This cannot be undone.');"
+                  >
+                    <button
+                      type="submit"
+                      class="inline-flex items-center px-3 py-1.5 rounded-md border border-red-300 text-sm text-red-700 hover:bg-red-50"
+                    >
+                      Delete
+                    </button>
+                  </form>
+                <% } %>
+              </div>
+            <!-- Report -->
+            <% if (!post.is_flagged){ %>
+            <form action="/posts/<%= post.id %>/flag" method="POST">
+              <button
+                type="submit"
+                name="id"
+                value="<%= post.id %>"
+                class="mb-2 py-1 px-3 flex items-center border rounded text-gray-500 hover:text-red-800 border-gray-300 hover:border-red-300 hover:bg-red-50"
+              >
+                <span class="hidden sm:inline mr-1 text-xs">Report</span>
+                <svg
+                  class="shrink-0 inline w-4 h-4"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"
+                  />
+                </svg>
+              </button>
+            </form>
+            <% } else {%>
+            <div class="mb-2 py-1 px-3 items-center border rounded text-red-800 border-red-800">
+              <span class="hidden sm:inline mr-1 text-xs">Reported</span>
+              <svg
+                class="shrink-0 inline w-4 h-4"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"
+                />
+              </svg>
+            </div>
+            <% } %>
             <!-- End Report -->
           </div>
           <div class="text-sm text-gray-500">
@@ -72,68 +94,97 @@
           <div class="whitespace-pre-wrap"><%= post.content %></div>
         </section>
 
-        <!-- Like -->
-        <% if (!likedByUser){ %>
-        <form action="/posts/<%= post.id %>/like" method="POST" class="pt-6 gap-3 flex flex-row items-center">
-          <button
-            type="submit"
-            name="id"
-            value="<%= post.id %>"
-            class="py-1 px-3 flex items-center border rounded text-gray-500 hover:text-purple-700 border-gray-300 hover:border-purple-300 hover:bg-purple-50"
-          >
-            <svg
-              class="shrink-0 inline w-4 h-4"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 24 24"
+        <div class="flex flex-row pt-6 justify-between">
+          <!-- Like -->
+          <% if (!likedByUser){ %>
+          <form action="/posts/<%= post.id %>/like" method="POST" class="gap-1 flex flex-row items-center">
+            <button
+              type="submit"
+              name="id"
+              value="<%= post.id %>"
+              class="py-1 px-3 flex items-center border rounded text-gray-500 hover:text-purple-700 border-gray-300 hover:border-purple-300 hover:bg-purple-50"
             >
-              <path
-                fill-rule="evenodd"
-                d="M15.03 9.684h3.965c.322 0 .64.08.925.232.286.153.532.374.717.645a2.109 2.109 0 0 1 .242 1.883l-2.36 7.201c-.288.814-.48 1.355-1.884 1.355-2.072 0-4.276-.677-6.157-1.256-.472-.145-.924-.284-1.348-.404h-.115V9.478a25.485 25.485 0 0 0 4.238-5.514 1.8 1.8 0 0 1 .901-.83 1.74 1.74 0 0 1 1.21-.048c.396.13.736.397.96.757.225.36.32.788.269 1.211l-1.562 4.63ZM4.177 10H7v8a2 2 0 1 1-4 0v-6.823C3 10.527 3.527 10 4.176 10Z"
-                clip-rule="evenodd"
-              />
-            </svg>
-            <span class="mx-1">Like</span>
-          </button>
-          <span class="text-gray-500 text-sm">(<%= likesCount %> likes)</span>
-        </form>
-        <% } else {%>
-        <form action="/posts/<%= post.id %>/like" method="POST" class="pt-6 flex flex-row gap-3 items-center">
-          <button
-            type="submit"
-            name="id"
-            value="<%= post.id %>"
-            class="py-1 px-3 flex items-center border rounded text-purple-700 hover:text-purple-700 border-transparent hover:border-purple-300 hover:bg-purple-50"
-          >
-            <svg
-              class="shrink-0 inline w-4 h-4"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 24 24"
+              <svg
+                class="shrink-0 inline w-4 h-4"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M15.03 9.684h3.965c.322 0 .64.08.925.232.286.153.532.374.717.645a2.109 2.109 0 0 1 .242 1.883l-2.36 7.201c-.288.814-.48 1.355-1.884 1.355-2.072 0-4.276-.677-6.157-1.256-.472-.145-.924-.284-1.348-.404h-.115V9.478a25.485 25.485 0 0 0 4.238-5.514 1.8 1.8 0 0 1 .901-.83 1.74 1.74 0 0 1 1.21-.048c.396.13.736.397.96.757.225.36.32.788.269 1.211l-1.562 4.63ZM4.177 10H7v8a2 2 0 1 1-4 0v-6.823C3 10.527 3.527 10 4.176 10Z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span class="mx-1">Like</span>
+            </button>
+            <span class="text-gray-500 text-sm">(<%= likesCount %> likes)</span>
+          </form>
+          <% } else {%>
+          <form action="/posts/<%= post.id %>/like" method="POST" class="flex flex-row gap-1 items-center">
+            <button
+              type="submit"
+              name="id"
+              value="<%= post.id %>"
+              class="py-1 px-3 flex items-center border rounded text-purple-700 hover:text-purple-700 border-transparent hover:border-purple-300 hover:bg-purple-50"
             >
-              <path
-                fill-rule="evenodd"
-                d="M15.03 9.684h3.965c.322 0 .64.08.925.232.286.153.532.374.717.645a2.109 2.109 0 0 1 .242 1.883l-2.36 7.201c-.288.814-.48 1.355-1.884 1.355-2.072 0-4.276-.677-6.157-1.256-.472-.145-.924-.284-1.348-.404h-.115V9.478a25.485 25.485 0 0 0 4.238-5.514 1.8 1.8 0 0 1 .901-.83 1.74 1.74 0 0 1 1.21-.048c.396.13.736.397.96.757.225.36.32.788.269 1.211l-1.562 4.63ZM4.177 10H7v8a2 2 0 1 1-4 0v-6.823C3 10.527 3.527 10 4.176 10Z"
-                clip-rule="evenodd"
-              />
-            </svg>
-            <span class="mx-1">Like</span>
-          </button>
-          <span class="text-gray-500 text-sm">(<%= likesCount %> likes)</span>
-        </form>
-        <%}%>
-        <!-- End Like -->
+              <svg
+                class="shrink-0 inline w-4 h-4"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M15.03 9.684h3.965c.322 0 .64.08.925.232.286.153.532.374.717.645a2.109 2.109 0 0 1 .242 1.883l-2.36 7.201c-.288.814-.48 1.355-1.884 1.355-2.072 0-4.276-.677-6.157-1.256-.472-.145-.924-.284-1.348-.404h-.115V9.478a25.485 25.485 0 0 0 4.238-5.514 1.8 1.8 0 0 1 .901-.83 1.74 1.74 0 0 1 1.21-.048c.396.13.736.397.96.757.225.36.32.788.269 1.211l-1.562 4.63ZM4.177 10H7v8a2 2 0 1 1-4 0v-6.823C3 10.527 3.527 10 4.176 10Z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span class="mx-1">Like</span>
+            </button>
+            <span class="text-gray-500 text-sm">(<%= likesCount %> likes)</span>
+          </form>
+          <%}%>
+          <!-- End Like -->
+
+          <!-- Follow -->
+          <% if (user && authorId && user.id !== authorId) { %>
+          <form
+            action="/profile/<%= authorId %>/<%= isFollowing ? 'unfollow' : 'follow' %>"
+            method="POST"
+            class="inline-block ml-2"
+          >
+            <!-- Redirect back to this post after action -->
+            <input
+              type="hidden"
+              name="redirect"
+              value="<%= (typeof currentUrl !== 'undefined' && currentUrl) ? currentUrl : (locals && locals.currentUrl) || ('/posts/' + post.id) %>"
+            />
+            <button
+              type="submit"
+              class="px-2 py-1 rounded border <%= isFollowing ? 'bg-red-600 text-white hover:bg-red-700 border-red-600' : 'text-gray-600 hover:text-indigo-600 hover:border-indigo-400' %>"
+            >
+              <%= isFollowing ? 'Unfollow' : 'Follow' %>
+            </button>
+          </form>
+          <% } %>
+          <!-- End Follow -->
+        </div>
 
         <!-- Comments -->
-        <div class="text-sm rounded-lg bg-gray-50 p-6 shadow mt-6 mb-3">
+        <div class="text-sm rounded-lg bg-gray-50 p-2 sm:p-6 shadow mt-6 mb-3">
           <p class="text-lg font-medium pb-3">Comments</p>
 
           <!-- Comment input field when logged in -->
           <% if (user) { %>
           <div class="bg-purple-50 rounded text-black">
-            <form class="p-4 flex flex-row gap-4" action="/posts/<%= post.id %>/comment" method="POST">
+            <form
+              class="p-2 sm:p-4 flex flex-col sm:flex-row gap-4"
+              action="/posts/<%= post.id %>/comment"
+              method="POST"
+            >
               <input
                 type="text"
                 name="comment"
