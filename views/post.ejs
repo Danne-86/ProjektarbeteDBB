@@ -12,45 +12,47 @@
         <header class="mb-4">
           <div class="flex flex-row items-center">
             <h1 class="text-3xl font-bold mb-2 flex-grow"><%= post.header %></h1>
-            <!-- Report -->
-            <% if (!post.is_flagged){ %>
-            <form action="/posts/<%= post.id %>/flag" method="POST">
-              <button
-                type="submit"
-                name="id"
-                value="<%= post.id %>"
-                class="py-1 px-3 flex items-center border rounded text-gray-500 hover:text-red-800 border-gray-300 hover:border-red-300 hover:bg-red-50"
-              >
-                <span class="mr-1 text-xs">Report</span>
-                <svg
-                  class="shrink-0 inline w-4 h-4"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"
-                  />
-                </svg>
-              </button>
-            </form>
-            <% } else {%>
-            <div class="py-1 px-3 flex items-center border rounded text-red-800 border-red-800">
-              <span class="mr-1 text-xs">Reported</span>
-              <svg
-                class="shrink-0 inline w-4 h-4"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"
-                />
-              </svg>
-            </div>
-            <% } %>
+            <!-- Actions group: Edit / Delete / Report (uniform size + spacing) -->
+              <div class="flex items-center gap-2 sm:ml-auto">
+                    <% if (user && user.id === post.user_id) { %>
+                      <a
+                        href="/blog/<%= post.id %>/edit"
+                        class="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        Edit
+                      </a>
+                      <form
+                        action="/blog/<%= post.id %>/delete"
+                        method="POST"
+                        onsubmit="return confirm('Delete this post? This cannot be undone.');"
+                      >
+                        <button
+                          type="submit"
+                          class="inline-flex items-center px-3 py-1.5 rounded-md border border-red-300 text-sm text-red-700 hover:bg-red-50"
+                        >
+                          Delete
+                        </button>
+                      </form>
+                    <% } %>
+
+                    <% if (!post.is_flagged) { %>
+                      <form action="/posts/<%= post.id %>/flag" method="POST">
+                        <button
+                          type="submit"
+                          class="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 text-sm text-gray-500 hover:text-red-800 hover:border-red-300 hover:bg-red-50"
+                        >
+                          <span class="mr-1">Report</span>
+                          <svg class="shrink-0 inline w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"/></svg>
+                        </button>
+                      </form>
+                    <% } else { %>
+                      <span class="inline-flex items-center px-3 py-1.5 rounded-md border border-red-800 text-sm text-red-800">
+                        <span class="mr-1">Reported</span>
+                        <svg class="shrink-0 inline w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"/></svg>
+                      </span>
+                    <% } %>
+                  </div>
+                </div>
             <!-- End Report -->
           </div>
           <div class="text-sm text-gray-500">

@@ -44,7 +44,10 @@
   <div class="container mx-auto px-4 py-8 max-w-3xl">
 
     <main class="bg-white rounded-xl shadow-lg p-6 md:p-8">
-      <form id="blogForm" action="/blog/new" method="POST" enctype="multipart/form-data">
+      <form id="blogForm" action="<%= (typeof isEdit !== 'undefined' && isEdit && post) ? ('/blog/' + post.id + '/edit') : '/blog/new' %>"
+        method="POST"
+        enctype="multipart/form-data"
+      >
         
         <div class="mb-8">
           <label for="title" class="block mb-2 font-semibold text-gray-700">
@@ -56,8 +59,9 @@
             name="title" 
             class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors" 
             placeholder="Enter a title for your post..."
+            value="<%= (typeof isEdit !== 'undefined' && isEdit && post) ? post.header : '' %>"
             required
-          >
+          />
         </div>
 
         <div class="mb-8">
@@ -71,36 +75,95 @@
             class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors blog-content" 
             placeholder="Write your blog post content here..."
             required
-          ></textarea>
+          ><%= (typeof isEdit !== 'undefined' && isEdit && post) ? post.content : '' %></textarea>
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-4 justify-end pt-6 border-t border-gray-200">
-          <button type="button" id="imageUploadBtn" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-400 transition-all duration-300">
-            <i class="fas fa-image mr-2"></i>Add Image
-          </button>
-          <input id="image" name="image" type="file" class="hidden" accept="image/*" />
-          
-          <button type="reset" id="resetBtn" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-all duration-300">
-            <i class="fas fa-redo-alt mr-2"></i>Clear
-          </button>
-          
-          <button type="submit" class="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-all duration-300">
-            <i class="fas fa-paper-plane mr-2"></i>Publish Post
-          </button>
+        <% if (typeof isEdit !== 'undefined' && isEdit && post && post.hero_image) { %>
+          <div class="mb-4">
+            <p class="text-sm text-gray-600 mb-2">Current image:</p>
+            <img src="<%= post.hero_image %>" alt="Current hero image" class="rounded-lg shadow max-h-48"/>
+          </div>
+        <% } %>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-between sm:items-center pt-6 border-t border-gray-200">
+          <div class="flex items-center gap-4">
+            <button
+              type="button"
+              id="imageUploadBtn"
+              class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-400 transition-all duration-300"
+            >
+              <i class="fas fa-image mr-2"></i>Add Image
+            </button>
+            <input id="image" name="image" type="file" class="hidden" accept="image/*" />
+          </div>
+
+          <div class="flex items-center gap-3">
+            <% if (typeof isEdit !== 'undefined' && isEdit && post) { %>
+              <!-- Cancel to post -->
+              <a
+                href="/posts/<%= post.id %>"
+                class="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+              >
+                Cancel
+              </a>
+
+              <!-- Delete (only on edit page) -->
+              <form
+                action="/blog/<%= post.id %>/delete"
+                method="POST"
+                onsubmit="return confirm('Delete this post? This cannot be undone.');"
+              >
+                <button
+                  type="submit"
+                  class="px-5 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition"
+                >
+                  Delete
+                </button>
+              </form>
+
+              <!-- Save (edit) -->
+              <button
+                type="submit"
+                class="px-6 py-2.5 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition"
+              >
+                Save changes
+              </button>
+            <% } else { %>
+              <!-- Cancel to my posts when creating -->
+              <a
+                href="/blog"
+                class="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+              >
+                Cancel
+              </a>
+
+              <!-- Publish (create) -->
+              <button
+                type="submit"
+                class="px-6 py-2.5 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition"
+              >
+                <i class="fas fa-paper-plane mr-2"></i>Publish Post
+              </button>
+            <% } %>
+          </div>
         </div>
 
         <div class="mt-4 text-center">
           <img id="imagePreview" class="image-preview mx-auto" alt="Image preview"/>
         </div>
       </form>
+
+      <% if (errorMessage) { %>
+        <div class="mt-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+          <span class="block sm:inline"><%= errorMessage %></span>
+        </div>
+      <% } %>
+      <% if (successMessage) { %>
+        <div class="mt-6 bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded-lg">
+          <span class="block sm:inline"><%= successMessage %></span>
+        </div>
+      <% } %>
     </main>
-
-    <% if (errorMessage) { %>
-      <div class="mt-8 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
-        <span class="block sm:inline"><%= errorMessage %></span>
-      </div>
-    <% } %>
-
   </div>
 
   <%- include('partials/imagePreviewManager') %>
