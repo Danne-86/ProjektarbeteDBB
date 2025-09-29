@@ -178,22 +178,5 @@
       </div>
     </main>
   </body>
-  <script>
-    // Spara scroll position innan form submit.
-    document.querySelectorAll("form").forEach(form => {
-        form.addEventListener("submit", () => {
-        localStorage.setItem("scrollY", window.scrollY);
-        });
-    });
-
-    // återgå till samma position efter att sidan har laddats.
-    window.addEventListener("load", () => {
-        const scrollY = localStorage.getItem("scrollY");
-        if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY));
-        localStorage.removeItem("scrollY");
-        }
-    });
-
-  </script>
+ 
 </html>
