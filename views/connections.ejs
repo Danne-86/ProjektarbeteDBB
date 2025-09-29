@@ -27,20 +27,21 @@
                 <div class="font-medium"><%= f.username %></div>
                 <div class="flex gap-2 mt-1 text-sm">
                   <a href="/profile/<%= f.id %>"
-                     class="px-2 py-1 rounded border text-gray-600 hover:bg-gray-50">Profile</a>
+                     class="inline-flex justify-center rounded-md p-[0.5rem] bg-purple-700 text-white hover:bg-purple-800">Profile</a>
                   <a href="/u/<%= encodeURIComponent(f.username) %>"
-                     class="px-2 py-1 rounded border text-gray-600 hover:bg-gray-50">Feed</a>
+                     class="inline-flex justify-center rounded-md p-[0.5rem] bg-purple-700 text-white hover:bg-purple-800">Feed</a>
+                  <% if (f.canFollowBack) { %>
+                  <form action="/profile/<%= f.id %>/follow" method="POST">
+                    <input type="hidden" name="redirect" value="<%= currentUrl %>" />
+                    <button class="p-[0.5rem] rounded bg-green-600 text-white hover:bg-green-700">
+                      Follow
+                    </button>
+                </form>
+              <% } %>
                 </div>
               </div>
 
-              <% if (f.canFollowBack) { %>
-                <form action="/profile/<%= f.id %>/follow" method="POST">
-                  <input type="hidden" name="redirect" value="<%= currentUrl %>" />
-                  <button class="px-3 py-1 rounded bg-purple-600 text-white hover:bg-purple-700">
-                    Follow back
-                  </button>
-                </form>
-              <% } %>
+              
             </div>
           <% }) %>
         </div>
@@ -62,18 +63,19 @@
                 <div class="font-medium"><%= f.username %></div>
                 <div class="flex gap-2 mt-1 text-sm">
                   <a href="/profile/<%= f.id %>"
-                     class="px-2 py-1 rounded border text-gray-600 hover:bg-gray-50">Profile</a>
+                     class="inline-flex justify-center rounded-md p-[0.5rem] bg-purple-700 text-white hover:bg-purple-800">Profile</a>
                   <a href="/u/<%= encodeURIComponent(f.username) %>"
-                     class="px-2 py-1 rounded border text-gray-600 hover:bg-gray-50">Feed</a>
+                     class="inline-flex justify-center rounded-md p-[0.5rem] bg-purple-700 text-white hover:bg-purple-800">Feed</a>
+                  <form action="/profile/<%= f.id %>/unfollow" method="POST">
+                  <input type="hidden" name="redirect" value="<%= currentUrl %>" />
+                  <button class="p-[0.5rem] rounded bg-red-600 text-white hover:bg-red-700">
+                    Unfollow
+                  </button>
+              </form>
                 </div>
               </div>
 
-              <form action="/profile/<%= f.id %>/unfollow" method="POST">
-                <input type="hidden" name="redirect" value="<%= currentUrl %>" />
-                <button class="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700">
-                  Unfollow
-                </button>
-              </form>
+              
             </div>
           <% }) %>
         </div>
