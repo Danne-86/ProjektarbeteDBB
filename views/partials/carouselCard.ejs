@@ -1,7 +1,7 @@
 <a href="posts/<%= post.id %>"
     class="carousel-item flex-[0_0_calc(100%_/_1_-_0.25rem)] sm:flex-[0_0_calc(100%/_2-_0.25rem)] lg:flex-[0_0_calc(100%_/_3_-_0.75rem)] text-center snap-start">
     <div class="grid grid-cols-3 space-between bg-[#A7ADBA]">
-        <img src="<%= post.avatar_url %>" alt="avatar" class="m-1 shrink-0 rounded-full object-cover object-center ring-1 ring-gray-300
+        <img src="<%= post.avatar_url ? post.avatar_url : 'avatars/SpongeBob_SquarePants_character.png' %>" alt="avatar" class="m-1 shrink-0 rounded-full object-cover object-center ring-1 ring-gray-300
                   size-5" />
         <h3 class="truncate text-black">
             <%= post.header %>

@@ -15,6 +15,7 @@ const adminRouter = require("./routes/admin");
 const feedRouter = require("./routes/feed");
 const blogRouter = require("./routes/blog");
 const profileRouter = require("./routes/profile");
+const searchRouter = require("./routes/search");
 
 const app = express();
 
@@ -157,6 +158,7 @@ app.use("/", indexRouter);
 app.use("/", authRouter);
 app.use("/admin", adminRouter);
 app.use("/profile", profileRouter);
+app.use("/search", searchRouter);
 
 // 404
 app.use(function (req, res, next) {
