@@ -11,7 +11,7 @@
     <main class="container mx-auto sm:px-4 sm:py-8 max-w-3xl">
       <article class="bg-white sm:rounded-xl sm:shadow sm:p-6">
         <header class="mb-4">
-          <div class="flex flex-row items-center gap-1">
+          <div class="flex flex-row items-center">
             <h1 class="text-3xl font-bold mb-2 flex-grow"><%= post.header %></h1>
 
             <!-- Actions (Edit / Delete / Report) -->
@@ -51,8 +51,13 @@
               <!-- Report Post -->
               <% if (!post.is_flagged) { %>
                 <form action="/posts/<%= post.id %>/flag" method="POST">
+                  <!-- Preserve navigation context -->
+                  <input type="hidden" name="prevUrl" value="<%= prevUrl || '/feed' %>" />
+                  <input type="hidden" name="redirect" value="/posts/<%= post.id %>?prevUrl=<%= encodeURIComponent(prevUrl || '/feed') %>" />
                   <button
                     type="submit"
+                    name="id"
+                    value="<%= post.id %>"
                     class="inline-flex items-center px-3 py-1 rounded border border-gray-300 text-gray-500 hover:text-red-800 hover:border-red-300 hover:bg-red-50"
                     title="Report post"
                     aria-label="Report post"
@@ -76,56 +81,54 @@
                 </span>
               <% } %>
             </div>
+            </div>
             <!-- /Actions -->
           </div>
 
           <div class="text-sm text-gray-500">
             By
-            <a
-              href="/u/<%= encodeURIComponent(post.username) %>"
-              class="font-medium text-indigo-700 hover:underline"
-            >@<%= post.username %></a>
+            <a href="/u/<%= encodeURIComponent(post.username) %>" class="font-medium text-indigo-700 hover:underline">@<%= post.username %></a>
             · <%= new Date(post.created_at).toLocaleString() %>
-          </div>
+            </div>
 
-          <div class="flex flex-row items-center">
-            <!-- Connections -->
-            <a
-              href="/profile/<%= encodeURIComponent(post.user_id) %>"
-              class="my-2 p-1 flex items-center border rounded text-gray-500 hover:text-purple-700 border-gray-300 hover:border-purple-300 hover:bg-purple-50"
-            >
-              <svg class="shrink-0 inline w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                <path fill-rule="evenodd" d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z" clip-rule="evenodd"/>
-              </svg>
-              <span class="ml-1 text-xs"><%= post.username %>'s Profile</span>
-            </a>
-
-            <!-- Follow -->
-            <% if (user && authorId && user.id !== authorId) { %>
-            <form
-              action="/profile/<%= authorId %>/<%= isFollowing ? 'unfollow' : 'follow' %>"
-              method="POST"
-              class="inline-block ml-2"
-            >
-              <input
-                type="hidden"
-                name="redirect"
-                value="<%= (typeof currentUrl !== 'undefined' && currentUrl) ? currentUrl : (locals && locals.currentUrl) || ('/posts/' + post.id) %>"
-              />
-              <button
-                type="submit"
-                class="py-1 px-3 flex items-center border rounded <%= isFollowing ? 'bg-red-600 text-white hover:bg-red-700 border-red-600' : 'text-gray-500 hover:text-purple-700 border-gray-300 hover:border-purple-300 hover:bg-purple-50' %>"
+            <div class="flex flex-row items-center">
+              <!-- Connections -->
+              <a
+                href="/profile/<%= encodeURIComponent(post.user_id) %>"
+                class="my-2 p-1 flex items-center border rounded text-gray-500 hover:text-purple-700 border-gray-300 hover:border-purple-300 hover:bg-purple-50"
               >
                 <svg class="shrink-0 inline w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                  <path fill-rule="evenodd" d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H7Zm8-1a1 1 0 0 1 1-1h1v-1a1 1 0 1 1 2 0v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
+                  <path fill-rule="evenodd" d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z" clip-rule="evenodd"/>
                 </svg>
-                <span class="mx-1 text-xs"><%= isFollowing ? 'Unfollow' : 'Follow' %></span>
-              </button>
-            </form>
-            <% } %>
-            <!-- End Follow -->
-            <!-- End Connections -->
-          </div>
+                <span class="ml-1 text-xs"><%= post.username %>'s Profile</span>
+              </a>
+
+              <!-- Follow -->
+              <% if (user && authorId && user.id !== authorId) { %>
+              <form
+                action="/profile/<%= authorId %>/<%= isFollowing ? 'unfollow' : 'follow' %>"
+                method="POST"
+                class="inline-block ml-2"
+              >
+                <input
+                  type="hidden"
+                  name="redirect"
+                  value="<%= (typeof currentUrl !== 'undefined' && currentUrl) ? currentUrl : (locals && locals.currentUrl) || ('/posts/' + post.id) %>"
+                />
+                <button
+                  type="submit"
+                  class="py-1 px-3 flex items-center border rounded <%= isFollowing ? 'bg-red-600 text-white hover:bg-red-700 border-red-600' : 'text-gray-500 hover:text-purple-700 border-gray-300 hover:border-purple-300 hover:bg-purple-50' %>"
+                >
+                  <svg class="shrink-0 inline w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd" d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H7Zm8-1a1 1 0 0 1 1-1h1v-1a1 1 0 1 1 2 0v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
+                  </svg>
+                  <span class="mx-1 text-xs"><%= isFollowing ? 'Unfollow' : 'Follow' %></span>
+                </button>
+              </form>
+              <% } %>
+              <!-- End Follow -->
+              <!-- End Connections -->
+            </div>
         </header>
 
         <section class="prose max-w-none">
@@ -135,10 +138,12 @@
           <div class="whitespace-pre-wrap"><%= post.content %></div>
         </section>
 
-        <div class="flex flex-row pt-6">
+        <div class="flex flex-row pt-6 justify-between">
           <!-- Like -->
           <% if (!likedByUser){ %>
           <form action="/posts/<%= post.id %>/like" method="POST" class="gap-1 flex flex-row items-center">
+            <input type="hidden" name="prevUrl" value="<%= prevUrl || '/feed' %>" />
+            <input type="hidden" name="redirect" value="/posts/<%= post.id %>?prevUrl=<%= encodeURIComponent(prevUrl || '/feed') %>" />
             <button
               type="submit"
               name="id"
@@ -154,6 +159,8 @@
           </form>
           <% } else { %>
           <form action="/posts/<%= post.id %>/like" method="POST" class="flex flex-row gap-1 items-center">
+            <input type="hidden" name="prevUrl" value="<%= prevUrl || '/feed' %>" />
+            <input type="hidden" name="redirect" value="/posts/<%= post.id %>?prevUrl=<%= encodeURIComponent(prevUrl || '/feed') %>" />
             <button
               type="submit"
               name="id"
@@ -169,52 +176,52 @@
           </form>
           <% } %>
           <!-- End Like -->
+
+          <!-- Follow -->
+          <% if (user && authorId && user.id !== authorId) { %>
+          <form action="/profile/<%= authorId %>/<%= isFollowing ? 'unfollow' : 'follow' %>" method="POST" class="inline-block ml-2">
+            <input type="hidden" name="prevUrl" value="<%= prevUrl || '/feed' %>" />
+            <input type="hidden" name="redirect" value="/posts/<%= post.id %>?prevUrl=<%= encodeURIComponent(prevUrl || '/feed') %>" />
+            <button
+              type="submit"
+              class="px-2 py-1 rounded border <%= isFollowing ? 'bg-red-600 text-white hover:bg-red-700 border-red-600' : 'text-gray-600 hover:text-indigo-600 hover:border-indigo-400' %>"
+            >
+              <%= isFollowing ? 'Unfollow' : 'Follow' %>
+            </button>
+          </form>
+          <% } %>
+          <!-- End Follow -->
         </div>
 
         <!-- Comments -->
         <div class="text-sm rounded-lg bg-gray-50 p-2 sm:p-6 shadow mt-6 mb-3">
           <p class="text-lg font-medium pb-3">Comments</p>
 
-          <!-- Comment input field when logged in -->
           <% if (user) { %>
           <div class="bg-purple-50 rounded text-black">
-            <form
-              class="p-2 sm:p-4 flex flex-col sm:flex-row gap-4"
-              action="/posts/<%= post.id %>/comment"
-              method="POST"
-            >
-              <input
-                type="text"
-                name="comment"
-                class="rounded-md p-2 flex-grow"
-                placeholder="Write a comment..."
-                id="comment"
-                required
-              />
-              <button
-                type="submit"
-                class="inline-flex items-center justify-center rounded-md px-5 py-2.5 bg-purple-700 text-white hover:bg-purple-800 shadow-sm"
-              >
+            <form class="p-2 sm:p-4 flex flex-col sm:flex-row gap-4" action="/posts/<%= post.id %>/comment" method="POST">
+              <input type="hidden" name="prevUrl" value="<%= prevUrl || '/feed' %>" />
+              <input type="hidden" name="redirect" value="/posts/<%= post.id %>?prevUrl=<%= encodeURIComponent(prevUrl || '/feed') %>" />
+              <input type="text" name="comment" class="rounded-md p-2 flex-grow" placeholder="Write a comment..." id="comment" />
+              <button type="submit" class="inline-flex items-center justify-center rounded-md px-5 py-2.5 bg-purple-700 text-white hover:bg-purple-800 shadow-sm">
                 Send
               </button>
             </form>
           </div>
           <% } %>
-          <!-- End Comment input field -->
 
           <% comments.forEach(comment => { %>
-            <div class="text-gray-500 pt-2">
-              <div class="border rounded border-gray-200 w-full flex flex-col p-1 bg-white">
-                <!-- Row 1: name, date, actions -->
-                <div class="flex items-center gap-2 w-full px-1">
-                  <p class="font-medium">
-                    <a href="/profile/<%= comment.user_id %>" class="inline-flex items-center">
-                      <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M12 20a7.966 7.966 0 0 1-5.002-1.756v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z" clip-rule="evenodd"/>
-                      </svg>
-                      <span class="hover:underline"><%= comment.username %></span>
-                    </a>
-                  </p>
+          <div class="text-gray-500 pt-2">
+            <div class="border rounded border-gray-200 w-full flex flex-col p-1 bg-white">
+              <div class="flex flex-row gap-2 w-full px-1">
+                <p class="font-medium">
+                  <a href="/u/<%= comment.username %>">
+                    <svg class="shrink-0 inline w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                      <path fill-rule="evenodd" d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="hover:underline"><%= comment.username %></span>
+                  </a>
+                </p>
 
                   <p class="flex-grow text-xs sm:text-sm"><%= comment.created_at %></p>
 
@@ -254,8 +261,13 @@
                     <!-- Report / Reported -->
                     <% if (!comment.is_flagged){ %>
                       <form action="/posts/<%= post.id %>/<%= comment.id %>/flag" method="POST">
+                        <!-- Preserve navigation context -->
+                        <input type="hidden" name="prevUrl" value="<%= prevUrl || '/feed' %>" />
+                        <input type="hidden" name="redirect" value="/posts/<%= post.id %>?prevUrl=<%= encodeURIComponent(prevUrl || '/feed') %>" />
                         <button
                           type="submit"
+                          name="id"
+                          value="<%= comment.id %>"
                           class="inline-flex items-center px-3 py-1 rounded border border-gray-300 text-gray-500 hover:text-red-800 hover:border-red-300 hover:bg-red-50"
                           title="Report comment"
                           aria-label="Report comment"
@@ -279,53 +291,50 @@
                       </span>
                     <% } %>
                   </div>
-                </div>
+                  </div>
 
-                <!-- Row 2: content + hidden edit-form -->
-                <div class="px-1 py-1">
-                  <p id="comment-text-<%= comment.id %>" class="text-black whitespace-pre-wrap"><%= comment.content %></p>
+                  <!-- Content + hidden edit-form -->
+                  <div class="px-1 py-1">
+                    <p id="comment-text-<%= comment.id %>" class="text-black whitespace-pre-wrap"><%= comment.content %></p>
 
-                  <% if (user && (user.id === comment.user_id || user.is_admin)) { %>
-                    <form
-                      id="comment-edit-<%= comment.id %>"
-                      class="hidden mt-2"
-                      action="/posts/<%= post.id %>/comments/<%= comment.id %>/edit"
-                      method="POST"
-                    >
-                      <textarea
-                        name="content"
-                        rows="3"
-                        class="w-full rounded-md border border-gray-300 p-2 outline-none focus:ring-2 focus:ring-purple-600"
-                      ><%= comment.content %></textarea>
-                      <div class="mt-2 flex items-center gap-2">
-                        <button
-                          type="submit"
-                          class="inline-flex items-center px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
-                          title="Save"
-                        >
-                          <!-- check -->
-                          <svg class="w-4 h-4 sm:mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                          </svg>
-                          <span class="hidden sm:inline">Save</span>
-                        </button>
-                        <button
-                          type="button"
-                          class="inline-flex items-center px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
-                          onclick="toggleEdit('<%= comment.id %>', true)"
-                          title="Cancel"
-                        >
-                          <!-- x -->
-                          <svg class="w-4 h-4 sm:mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                          </svg>
-                          <span class="hidden sm:inline">Cancel</span>
-                        </button>
-                      </div>
-                    </form>
-                  <% } %>
-                </div>
-              </div>
+                    <% if (user && (user.id === comment.user_id || user.is_admin)) { %>
+                      <form
+                        id="comment-edit-<%= comment.id %>"
+                        class="hidden mt-2"
+                        action="/posts/<%= post.id %>/comments/<%= comment.id %>/edit"
+                        method="POST"
+                      >
+                        <textarea
+                          name="content"
+                          rows="3"
+                          class="w-full rounded-md border border-gray-300 p-2 outline-none focus:ring-2 focus:ring-purple-600"
+                        ><%= comment.content %></textarea>
+                        <div class="mt-2 flex items-center gap-2">
+                          <button
+                            type="submit"
+                            class="inline-flex items-center px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
+                            title="Save"
+                          >
+                            <svg class="w-4 h-4 sm:mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                              <path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                            <span class="hidden sm:inline">Save</span>
+                          </button>
+                          <button
+                            type="button"
+                            class="inline-flex items-center px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
+                            onclick="toggleEdit('<%= comment.id %>', true)"
+                            title="Cancel"
+                          >
+                            <svg class="w-4 h-4 sm:mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                              <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            </svg>
+                            <span class="hidden sm:inline">Cancel</span>
+                          </button>
+                        </div>
+                      </form>
+                    <% } %>
+                  </div>
             </div>
           <% }); %>
         </div>
@@ -333,9 +342,9 @@
       </article>
 
       <div class="mt-6">
-        <% 
-          const _prev = (typeof prevUrl !== 'undefined') ? prevUrl : null;
-          const _curr = (typeof currentUrl !== 'undefined') ? currentUrl : null;
+        <%
+          const _prev = prevUrl || '/feed';
+          const _curr = currentUrl || ('/posts/' + post.id);
           const backUrl = (_prev && _prev !== _curr) ? _prev : '/feed';
         %>
         <a href="<%= backUrl %>" class="text-indigo-600 hover:underline"> &larr; Back </a>
@@ -363,4 +372,5 @@
       }
     </script>
   </body>
+ 
 </html>
