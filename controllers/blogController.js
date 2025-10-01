@@ -47,10 +47,6 @@ function getPostById(req, res) {
     )
     .get(id);
 
-    if (!post) {
-      return res.status(404).render("error", { message: "Post not found" });
-    }
-
   const comments = db
     .prepare(
       `
@@ -342,46 +338,135 @@ function deletePost(req, res) {
 }
 
 function createComment(req, res) {
+  const user = req.user;
+  const postId = req.params.id;
+
+  // Make post available in catch block
+  let post;
   try {
-    const user = req.user;
-    const postId = req.params.id;
+    // Get same fields as in getPostById
+    post = db.prepare(`
+      SELECT p.id, p.header, p.content, p.created_at, p.hero_image, p.is_flagged, p.user_id, u.username
+      FROM posts p
+      JOIN users u ON u.id = p.user_id
+      WHERE p.id = ?
+    `).get(postId);
 
-    const post = db.prepare("SELECT * FROM posts WHERE id = ?").get(postId);
-    if (!post)
-      return res.status(404).render("error", { error: "Post not found" });
+    if (!post) return res.status(404).render("error", { error: "Post not found" });
 
-    let errors = [];
+    // URLs for redirect/hidden inputs (avoid "prevUrl is not defined" in EJS)
+    const prevUrl = req.body?.prevUrl || req.query?.prevUrl || req.get("Referer") || "/feed";
+    const currentUrl = req.originalUrl;
 
-    const comment = req.body.comment.trim();
+    // Safe trim (doesn't crash if field is missing)
+    const comment = String(req.body?.comment ?? "").trim();
+
+    const errors = [];
+    if (!user?.id) errors.push("You must be logged in to comment.");
     if (!comment) errors.push("Comment is required.");
     if (comment.length > 500) errors.push("Content must be ≤ 500 characters.");
 
     if (errors.length > 0) {
+      // Load data the view uses
+      const comments = db.prepare(`
+        SELECT c.id, c.user_id, c.post_id, c.content, c.created_at, c.is_flagged, u.username
+        FROM comments c
+        JOIN users u ON u.id = c.user_id
+        WHERE c.post_id = ?
+        ORDER BY c.created_at DESC
+      `).all(postId);
+
+      const likes = db.prepare(`
+        SELECT
+          COUNT(*) AS count,
+          EXISTS (SELECT 1 FROM likes WHERE user_id = ? AND post_id = ?) AS by_user
+        FROM likes
+        WHERE post_id = ?
+      `).get(user?.id || 0, postId, postId);
+
+      const likesCount = likes?.count || 0;
+      const likedByUser = !!likes?.by_user;
+
+      let isFollowing = false;
+      const viewerId = user?.id || null;
+      const authorId = post.user_id;
+      if (viewerId && authorId && viewerId !== authorId) {
+        const row = db.prepare(
+          "SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ?"
+        ).get(viewerId, authorId);
+        isFollowing = !!row;
+      }
+
       return res.status(400).render("post", {
         title: post.header,
         post,
+        comments,
         user,
-        isAuthenticated: true,
+        likesCount,
+        likedByUser,
+        authorId: post.user_id,
+        isFollowing,
+        isAuthenticated: Boolean(user),
         errorMessage: errors.join(" "),
         successMessage: null,
+        prevUrl,
+        currentUrl,
       });
     }
 
+    // Save and redirect to the post
     db.prepare(
       "INSERT INTO comments (user_id, post_id, content) VALUES (?, ?, ?)"
     ).run(user.id, postId, comment);
 
-    res.redirect(`/posts/${postId}`);
+    return res.redirect(`/posts/${postId}`);
   } catch (err) {
     console.error("Error in createComment", err);
-    return res.render("post", {
-      title: "Error",
-      post,
-      user,
-      isAuthenticated: true,
-      errorMessage: "Error creating comment.",
-      errorMessage: null,
-    });
+
+    // Try to render the page with error message and as much data as possible
+    try {
+      const prevUrl = req.body?.prevUrl || req.query?.prevUrl || req.get("Referer") || "/feed";
+      const currentUrl = req.originalUrl;
+
+      const comments = post
+        ? db.prepare(`
+            SELECT c.id, c.user_id, c.post_id, c.content, c.created_at, c.is_flagged, u.username
+            FROM comments c
+            JOIN users u ON u.id = c.user_id
+            WHERE c.post_id = ?
+            ORDER BY c.created_at DESC
+          `).all(post.id)
+        : [];
+
+      const likes = post
+        ? db.prepare(`
+            SELECT
+              COUNT(*) AS count,
+              EXISTS (SELECT 1 FROM likes WHERE user_id = ? AND post_id = ?) AS by_user
+            FROM likes
+            WHERE post_id = ?
+          `).get(user?.id || 0, postId, postId)
+        : { count: 0, by_user: 0 };
+
+      return res.status(500).render("post", {
+        title: post ? post.header : "Error",
+        post: post || null,
+        comments,
+        user,
+        likesCount: likes?.count || 0,
+        likedByUser: !!likes?.by_user,
+        authorId: post?.user_id || null,
+        isFollowing: false,
+        isAuthenticated: Boolean(user),
+        errorMessage: "Error creating comment.",
+        successMessage: null,
+        prevUrl,
+        currentUrl,
+      });
+    } catch (e) {
+      // Last resort
+      return res.status(500).render("error", { message: "Error creating comment" });
+    }
   }
 }
 
