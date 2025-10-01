@@ -364,7 +364,6 @@ function createComment(req, res) {
     const errors = [];
     if (!user?.id) errors.push("You must be logged in to comment.");
     if (!comment) errors.push("Comment is required.");
-    if (comment.length > 500) errors.push("Content must be ≤ 500 characters.");
 
     if (errors.length > 0) {
       // Load data the view uses
@@ -498,7 +497,6 @@ function updateComment(req, res) {
     let content = (req.body.content || "").trim();
     const errors = [];
     if (!content) errors.push("Comment is required.");
-    if (content.length > 500) errors.push("Content must be ≤ 500 characters.");
 
     if (errors.length) {
       req.session.errorMessage = errors.join(" ");
