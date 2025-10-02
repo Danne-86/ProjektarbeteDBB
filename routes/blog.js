@@ -16,18 +16,41 @@ function requireLoginRedirect(req, res, next) {
   return res.redirect(`/login?returnTo=${returnTo}`);
 }
 
-// blog -> Private: get my posts
+// PRIVATE: my posts
 router.get("/", requireLoginRedirect, blogController.getMyPosts);
 
-// /blog/new -> post page (requires login)
+// PRIVATE: create form
 router.get("/new", requireLoginRedirect, (req, res) => {
   res.render("blogpage", {
     title: "Create Blog Post",
     successMessage: null,
     errorMessage: null,
+    isEdit: false,
+    user: req.user,
+    isAuthenticated: true,
   });
 });
 
-router.post("/new", requireLoginRedirect, uploadPostImage.single("image"), blogController.createPost);
+// PRIVATE: create submit
+router.post(
+  "/new",
+  requireLoginRedirect,
+  uploadPostImage.single("image"),
+  blogController.createPost
+);
+
+// PRIVATE: edit form
+router.get("/:id/edit", requireLoginRedirect, blogController.renderEditForm);
+
+// PRIVATE: edit submit
+router.post(
+  "/:id/edit",
+  requireLoginRedirect,
+  uploadPostImage.single("image"),
+  blogController.updatePost
+);
+
+// PRIVATE: delete submit
+router.post("/:id/delete", requireLoginRedirect, blogController.deletePost);
 
 module.exports = router;

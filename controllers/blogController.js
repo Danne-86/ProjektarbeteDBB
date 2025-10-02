@@ -1,4 +1,15 @@
 const db = require("../db");
+const fs = require("fs");
+const path = require("path");
+
+// remove a file under /public safely (given its web path like "/posts/abc.jpg")
+function tryRemovePublicFile(webPath) {
+  try {
+    if (!webPath) return;
+    const abs = path.join(__dirname, "..", "public", webPath.replace(/^\//, ""));
+    if (fs.existsSync(abs)) fs.unlinkSync(abs);
+  } catch (_) {}
+}
 
 // Helper to add excerpt to posts
 function mapExcerpt(rows) {
@@ -35,6 +46,7 @@ function getPostById(req, res) {
     ORDER BY p.created_at DESC`
     )
     .get(id);
+
   const comments = db
     .prepare(
       `
@@ -203,26 +215,74 @@ function createPost(req, res) {
   }
 }
 
-function createComment(req, res) {
+// GET /blog/:id/edit – render edit form
+function renderEditForm(req, res) {
+  if (!req.user?.id) {
+    return res.redirect("/login?returnTo=" + encodeURIComponent(req.originalUrl));
+  }
+
+  const { id } = req.params;
+  const post = db
+    .prepare(`SELECT id, user_id, header, content, hero_image FROM posts WHERE id = ?`)
+    .get(id);
+
+  if (!post) return res.status(404).render("error", { message: "Post not found" });
+  if (post.user_id !== req.user.id) {
+    return res.status(403).render("error", { message: "You can't edit this post." });
+  }
+
+  // Reuse blogpage.ejs for editing
+  res.render("blogpage", {
+    title: "Edit Post",
+    isEdit: true,
+    post,
+    user: req.user,
+    isAuthenticated: true,
+    successMessage: null,
+    errorMessage: null,
+  });
+}
+
+// POST /blog/:id/edit – update post (+ optional new hero image)
+function updatePost(req, res) {
   try {
-    const user = req.user;
-    const postId = req.params.id;
+    if (!req.user?.id) {
+      return res.redirect("/login?returnTo=" + encodeURIComponent(req.originalUrl));
+    }
 
-    const post = db.prepare("SELECT * FROM posts WHERE id = ?").get(postId);
-    if (!post)
-      return res.status(404).render("error", { error: "Post not found" });
+    const { id } = req.params;
+    const existing = db
+      .prepare(`SELECT id, user_id, header, content, hero_image FROM posts WHERE id = ?`)
+      .get(id);
 
-    let errors = [];
+    if (!existing) return res.status(404).render("error", { message: "Post not found" });
+    if (existing.user_id !== req.user.id) {
+      return res.status(403).render("error", { message: "You can't edit this post." });
+    }
 
-    const comment = req.body.comment.trim();
-    if (!comment) errors.push("Comment is required.");
-    if (comment.length > 500) errors.push("Content must be ≤ 500 characters.");
+    let { title, content } = req.body;
+    title = (title || "").trim();
+    content = (content || "").trim();
 
-    if (errors.length > 0) {
-      return res.status(400).render("post", {
-        title: post.header,
-        post,
-        user,
+    const errors = [];
+    if (!title) errors.push("Title is required.");
+    if (!content) errors.push("Content is required.");
+    if (title.length > 120) errors.push("Title must be ≤ 120 characters.");
+    if (content.length > 20000) errors.push("Content must be ≤ 20,000 characters.");
+
+    // Replace image if a new one was uploaded; otherwise keep the old one
+    let heroPath = existing.hero_image;
+    if (req.file) {
+      tryRemovePublicFile(existing.hero_image);
+      heroPath = "/posts/" + req.file.filename;
+    }
+
+    if (errors.length) {
+      return res.status(400).render("blogpage", {
+        title: "Edit Post",
+        isEdit: true,
+        post: { ...existing, header: title, content, hero_image: heroPath },
+        user: req.user,
         isAuthenticated: true,
         errorMessage: errors.join(" "),
         successMessage: null,
@@ -230,20 +290,260 @@ function createComment(req, res) {
     }
 
     db.prepare(
+      `UPDATE posts
+       SET header = ?, content = ?, hero_image = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ? AND user_id = ?`
+    ).run(title, content, heroPath, id, req.user.id);
+
+    req.session.successMessage = "Post updated.";
+    return res.redirect(`/posts/${id}`);
+  } catch (err) {
+    console.error("updatePost error", err);
+    return res.status(500).render("error", { message: "Error updating post" });
+  }
+}
+
+// POST /blog/:id/delete – delete post (+ image + likes)
+function deletePost(req, res) {
+  try {
+    if (!req.user?.id) {
+      return res.redirect("/login?returnTo=" + encodeURIComponent(req.originalUrl));
+    }
+
+    const { id } = req.params;
+    const existing = db
+      .prepare(`SELECT id, user_id, hero_image FROM posts WHERE id = ?`)
+      .get(id);
+
+    if (!existing) return res.status(404).render("error", { message: "Post not found" });
+    if (existing.user_id !== req.user.id) {
+      return res.status(403).render("error", { message: "You can't delete this post." });
+    }
+
+    // Remove image best-effort
+    tryRemovePublicFile(existing.hero_image);
+
+    // Remove likes (if you don't have FK cascade on likes)
+    try { db.prepare(`DELETE FROM likes WHERE post_id = ?`).run(id); } catch (_) {}
+
+    // Comments have ON DELETE CASCADE in your schema; delete post last
+    db.prepare(`DELETE FROM posts WHERE id = ? AND user_id = ?`).run(id, req.user.id);
+
+    req.session.successMessage = "Post deleted.";
+    return res.redirect("/blog");
+  } catch (err) {
+    console.error("deletePost error", err);
+    return res.status(500).render("error", { message: "Error deleting post" });
+  }
+}
+
+function createComment(req, res) {
+  const user = req.user;
+  const postId = req.params.id;
+
+  // Make post available in catch block
+  let post;
+  try {
+    // Get same fields as in getPostById
+    post = db.prepare(`
+      SELECT p.id, p.header, p.content, p.created_at, p.hero_image, p.is_flagged, p.user_id, u.username
+      FROM posts p
+      JOIN users u ON u.id = p.user_id
+      WHERE p.id = ?
+    `).get(postId);
+
+    if (!post) return res.status(404).render("error", { error: "Post not found" });
+
+    // URLs for redirect/hidden inputs (avoid "prevUrl is not defined" in EJS)
+    const prevUrl = req.body?.prevUrl || req.query?.prevUrl || req.get("Referer") || "/feed";
+    const currentUrl = req.originalUrl;
+
+    // Safe trim (doesn't crash if field is missing)
+    const comment = String(req.body?.comment ?? "").trim();
+
+    const errors = [];
+    if (!user?.id) errors.push("You must be logged in to comment.");
+    if (!comment) errors.push("Comment is required.");
+
+    if (errors.length > 0) {
+      // Load data the view uses
+      const comments = db.prepare(`
+        SELECT c.id, c.user_id, c.post_id, c.content, c.created_at, c.is_flagged, u.username
+        FROM comments c
+        JOIN users u ON u.id = c.user_id
+        WHERE c.post_id = ?
+        ORDER BY c.created_at DESC
+      `).all(postId);
+
+      const likes = db.prepare(`
+        SELECT
+          COUNT(*) AS count,
+          EXISTS (SELECT 1 FROM likes WHERE user_id = ? AND post_id = ?) AS by_user
+        FROM likes
+        WHERE post_id = ?
+      `).get(user?.id || 0, postId, postId);
+
+      const likesCount = likes?.count || 0;
+      const likedByUser = !!likes?.by_user;
+
+      let isFollowing = false;
+      const viewerId = user?.id || null;
+      const authorId = post.user_id;
+      if (viewerId && authorId && viewerId !== authorId) {
+        const row = db.prepare(
+          "SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ?"
+        ).get(viewerId, authorId);
+        isFollowing = !!row;
+      }
+
+      return res.status(400).render("post", {
+        title: post.header,
+        post,
+        comments,
+        user,
+        likesCount,
+        likedByUser,
+        authorId: post.user_id,
+        isFollowing,
+        isAuthenticated: Boolean(user),
+        errorMessage: errors.join(" "),
+        successMessage: null,
+        prevUrl,
+        currentUrl,
+      });
+    }
+
+    // Save and redirect to the post
+    db.prepare(
       "INSERT INTO comments (user_id, post_id, content) VALUES (?, ?, ?)"
     ).run(user.id, postId, comment);
 
-    res.redirect(`/posts/${postId}`);
+    return res.redirect(`/posts/${postId}`);
   } catch (err) {
     console.error("Error in createComment", err);
-    return res.render("post", {
-      title: "Error",
-      post,
-      user,
-      isAuthenticated: true,
-      errorMessage: "Error creating comment.",
-      errorMessage: null,
-    });
+
+    // Try to render the page with error message and as much data as possible
+    try {
+      const prevUrl = req.body?.prevUrl || req.query?.prevUrl || req.get("Referer") || "/feed";
+      const currentUrl = req.originalUrl;
+
+      const comments = post
+        ? db.prepare(`
+            SELECT c.id, c.user_id, c.post_id, c.content, c.created_at, c.is_flagged, u.username
+            FROM comments c
+            JOIN users u ON u.id = c.user_id
+            WHERE c.post_id = ?
+            ORDER BY c.created_at DESC
+          `).all(post.id)
+        : [];
+
+      const likes = post
+        ? db.prepare(`
+            SELECT
+              COUNT(*) AS count,
+              EXISTS (SELECT 1 FROM likes WHERE user_id = ? AND post_id = ?) AS by_user
+            FROM likes
+            WHERE post_id = ?
+          `).get(user?.id || 0, postId, postId)
+        : { count: 0, by_user: 0 };
+
+      return res.status(500).render("post", {
+        title: post ? post.header : "Error",
+        post: post || null,
+        comments,
+        user,
+        likesCount: likes?.count || 0,
+        likedByUser: !!likes?.by_user,
+        authorId: post?.user_id || null,
+        isFollowing: false,
+        isAuthenticated: Boolean(user),
+        errorMessage: "Error creating comment.",
+        successMessage: null,
+        prevUrl,
+        currentUrl,
+      });
+    } catch (e) {
+      // Last resort
+      return res.status(500).render("error", { message: "Error creating comment" });
+    }
+  }
+}
+
+function updateComment(req, res) {
+  try {
+    if (!req.user?.id) {
+      return res.status(401).render("login", {
+        title: "Login",
+        errors: ["Please log in to continue."],
+        errorMessage: null,
+        values: {},
+      });
+    }
+
+    const { postId, commentId } = req.params;
+    const existing = db
+      .prepare(`SELECT id, user_id, post_id FROM comments WHERE id = ? AND post_id = ?`)
+      .get(commentId, postId);
+
+    if (!existing) {
+      return res.status(404).render("error", { message: "Comment not found" });
+    }
+
+    const isOwnerOrAdmin = existing.user_id === req.user.id || !!req.user.is_admin;
+    if (!isOwnerOrAdmin) {
+      return res.status(403).render("error", { message: "You can't edit this comment." });
+    }
+
+    let content = (req.body.content || "").trim();
+    const errors = [];
+    if (!content) errors.push("Comment is required.");
+
+    if (errors.length) {
+      req.session.errorMessage = errors.join(" ");
+      return res.redirect(`/posts/${postId}#c-${commentId}`);
+    }
+
+    db.prepare(`UPDATE comments SET content = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`)
+      .run(content, commentId);
+
+    return res.redirect(`/posts/${postId}#c-${commentId}`);
+  } catch (e) {
+    console.error("updateComment error", e);
+    return res.status(500).render("error", { message: "Error updating comment" });
+  }
+}
+
+// DELETE comment: POST /posts/:postId/comments/:commentId/delete
+function deleteComment(req, res) {
+  try {
+    if (!req.user?.id) {
+      return res.status(401).render("login", {
+        title: "Login",
+        errors: ["Please log in to continue."],
+        errorMessage: null,
+        values: {},
+      });
+    }
+
+    const { postId, commentId } = req.params;
+    const existing = db
+      .prepare(`SELECT id, user_id, post_id FROM comments WHERE id = ? AND post_id = ?`)
+      .get(commentId, postId);
+
+    if (!existing) {
+      return res.status(404).render("error", { message: "Comment not found" });
+    }
+
+    const isOwnerOrAdmin = existing.user_id === req.user.id || !!req.user.is_admin;
+    if (!isOwnerOrAdmin) {
+      return res.status(403).render("error", { message: "You can't delete this comment." });
+    }
+
+    db.prepare(`DELETE FROM comments WHERE id = ?`).run(commentId);
+    return res.redirect(`/posts/${postId}`);
+  } catch (e) {
+    console.error("deleteComment error", e);
+    return res.status(500).render("error", { message: "Error deleting comment" });
   }
 }
 
@@ -310,4 +610,9 @@ module.exports = {
   flagPost,
   flagComment,
   likePost,
+  renderEditForm,       // GET  /blog/:id/edit
+  updatePost,           // POST /blog/:id/edit
+  deletePost,           // POST /blog/:id/delete
+  updateComment,        // POST /posts/:postId/comments/:commentId/edit
+  deleteComment         // POST /posts/:postId/comments/:commentId/delete
 };
